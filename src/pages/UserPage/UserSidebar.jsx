@@ -3,7 +3,7 @@ import Slider from "@mui/material/Slider";
 import { Box } from "@mui/material";
 import { useLogin } from "../../hooks/LoginContext";
 
-const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
+const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFilters, onFilterChange }) => {
   const MIN_PRICE = 1000;
   const MAX_PRICE = 1000000;
   const [priceRange, setPriceRange] = useState([MIN_PRICE, MAX_PRICE]);
@@ -15,56 +15,27 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
     logout();
   };
 
-  // useEffect(() => {
-  //   let filtered = properties;
-  //   console.log(filtered);
-  //   let pric = currentFilters;
-  //   console.log(pric);
-
-  //   if (!anyPrice) {
-  //     filtered = filtered.filter(
-  //       (property) =>
-  //         property.rate_buy >= priceRange[0] &&
-  //         property.rate_buy <= priceRange[1],
-  //         console.log(properties.rate_buy)
-  //     );
-  //   }
-   
-  // }, [anyPrice]);
-
   useEffect(() => {
-    let filtered = [...properties]; // Ensure we are working on a copy
-
-    console.log("Original Properties:", filtered);
-    console.log("Current Filters:", currentFilters);
-
-    // Extracting price range from currentFilters
-    const { priceRange } = currentFilters;
-
-    if (!anyPrice && priceRange?.length === 2) {
-        filtered = filtered.filter((property) => {
-            console.log("Property Rate Buy:", property.rate_buy);
-            return property.rate_buy >= priceRange[0] && property.rate_buy <= priceRange[1];
-        });
-    }
-
-    console.log("Filtered Properties:", filtered);
-
-}, [anyPrice, currentFilters, properties]); 
+    // Sync priceRange with currentFilters from parent
+    setPriceRange(currentFilters.priceRange);
+    setAnyPrice(currentFilters.anyPrice);
+  }, [currentFilters]);
 
   const handleAnyPriceChange = (event) => {
-    setAnyPrice(event.target.checked);
-    // If "Any Price" is checked, reset the price range to the full range
-
-    if (event.target.checked) {
+    const checked = event.target.checked;
+    setAnyPrice(checked);
+    if (checked) {
       setPriceRange([MIN_PRICE, MAX_PRICE]);
+      onFilterChange({ priceRange: [MIN_PRICE, MAX_PRICE], anyPrice: true });
+    } else {
+      onFilterChange({ priceRange, anyPrice: false });
     }
   };
 
   // Handle price range slider change
   const handlePriceChange = (event, newValue) => {
     setPriceRange(newValue);
-    onFilterChange({ priceRange: newValue }); // Propagate the change to the parent component
+    onFilterChange({ priceRange: newValue , anyPrice: false}); // Propagate the change to the parent component
   };
 
   // Handle city selection
@@ -168,10 +139,10 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
           </label>
           <Box sx={{ width: "100%", paddingBottom: "1rem" }}>
             <Slider
-              value={currentFilters.priceRange}
+              value={priceRange}
               onChange={handlePriceChange}
               valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `$${value.toLocaleString()}`}
+              valueLabelFormat={(value) => `${value.toLocaleString()}`}
               min={MIN_PRICE}
               max={MAX_PRICE}
               step={1000}
@@ -193,8 +164,8 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
             />
           </Box>
           <div className="flex items-center justify-between -mt-4 text-sm text-gray-500">
-            <div>${currentFilters.priceRange[0].toLocaleString()}</div>
-            <div>${currentFilters.priceRange[1].toLocaleString()}</div>
+            <div>₹{priceRange[0].toLocaleString()}</div>
+            <div>₹{priceRange[1].toLocaleString()}</div>
           </div>
         </div>
 

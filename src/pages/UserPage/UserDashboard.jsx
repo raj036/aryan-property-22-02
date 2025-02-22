@@ -39,8 +39,8 @@ const UserDashboard = () => {
   const [showfilterdata, setshowfilterData] = useState(false);
   const fetchfilter = async () => {
     try {
-      console.log(from);
-      console.log(to);
+      // console.log(from);
+      // console.log(to);
       const response = await axios.get(
         `/api/get_all_properties_by_area/?from_area=${from}&to_area=${to}`,
         {
@@ -50,7 +50,7 @@ const UserDashboard = () => {
           },
         }
       );
-      console.log(response.data);
+      // console.log(response.data);
       setFilterData(response.data);
       setshowfilterData(true);
     } catch (e) {
@@ -66,7 +66,7 @@ const UserDashboard = () => {
   const FetchfilterArea = async () => {
     try {
       const response = await axios("/api/filter_area/");
-      console.log(response.data, "filterdata");
+      // console.log(response.data, "filterdata");
       setFilterArea(response.data);
     } catch (e) {
       console.log("error", e);
@@ -90,7 +90,7 @@ const UserDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
+      // console.log(response.data);
 
       if (!response.data) throw new Error("No data received");
 
@@ -135,7 +135,7 @@ const UserDashboard = () => {
         reffered_by: property.contacts[0]?.reffered_by || "-",
         contact_person_address: property.contacts[0]?.address || "-",
       }));
-      console.log(transformedProperties);
+      // console.log(transformedProperties);
       setProperties(transformedProperties);
       setFilteredPropertiesSidebar(transformedProperties);
       setLoading(false);
@@ -148,32 +148,26 @@ const UserDashboard = () => {
 
   const getFilteredProperties = () => {
     return properties.filter((property) => {
-      const rateBuyNumeric = parseFloat(
-        property.rate_buy.replace(/[^0-9.-]+/g, "")
-      );
-      // Apply search term filter
+      const rateBuyNumeric = typeof property.rate_buy === "string" && property.rate_buy !== "-"
+      ? parseFloat(property.rate_buy.replace(/[^0-9.-]+/g, ""))
+      : property.rate_buy;
+  
       const matchesSearch = Object.values(property).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
       );
-
-      // Apply dropdown property type filter
+  
       const matchesDropdownPropertyType =
-        !selectedPropertyType ||
-        property.property_type === selectedPropertyType;
-
-      // Apply sidebar filters
+        !selectedPropertyType || property.property_type === selectedPropertyType;
+  
       const matchesSidebarPropertyType =
-        !filters.propertyType ||
-        property.property_type === filters.propertyType;
-
+        !filters.propertyType || property.property_type === filters.propertyType;
+  
       const matchesCity = !filters.city || property.city_name === filters.city;
-
+  
       const matchesPrice =
         filters.anyPrice ||
-        (rateBuyNumeric >= filters.priceRange[0] &&
-          rateBuyNumeric <= filters.priceRange[1]);
-
-      // All filters must match
+        (rateBuyNumeric >= filters.priceRange[0] && rateBuyNumeric <= filters.priceRange[1]);
+  
       return (
         matchesSearch &&
         matchesDropdownPropertyType &&
@@ -183,9 +177,10 @@ const UserDashboard = () => {
       );
     });
   };
+  
 
   useEffect(() => {
-    console.log("Filters updated:", filters);
+    // console.log("Filters updated:", filters);
   }, [filters]);
 
   // Handler for filter updates from sidebar

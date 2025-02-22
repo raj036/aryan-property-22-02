@@ -168,7 +168,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             aria-label="Toggle Sidebar"
           >
             {isSidebarOpen ? (
-              <button
+              <span
                 style={{
                   width: "35px",
                   height: "35px",
@@ -183,9 +183,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 }}
               >
                 <MdOutlineArrowBackIos />
-              </button>
+              </span>
             ) : (
-              <button
+              <span
                 style={{
                   width: "35px",
                   height: "35px",
@@ -200,7 +200,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 }}
               >
                 <MdOutlineArrowForwardIos />
-              </button>
+              </span>
             )}
           </button>
         </div>

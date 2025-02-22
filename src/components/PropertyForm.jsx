@@ -407,7 +407,7 @@ const PropertyForm = ({ setShowPropertyForm }) => {
 
               <label className="block text-sm font-semibold">Rental psf</label>
               <input
-                type="text"
+                type="number"
                 name="rental_psf"
                 className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
                 value={formData.areas[0].rental_psf}
@@ -438,7 +438,7 @@ const PropertyForm = ({ setShowPropertyForm }) => {
                 Outright Rate psf
               </label>
               <input
-                type="text"
+                type="number"
                 name="outright_rate_psf"
                 className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
                 value={formData.areas[0].outright_rate_psf}
