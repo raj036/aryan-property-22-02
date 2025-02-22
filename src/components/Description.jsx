@@ -91,9 +91,9 @@ const Descriptions = () => {
               </thead>
               <tbody>
                 {descriptions.map((desc) => (
-                  <tr key={desc.des_id} className="border-b hover:bg-gray-100">
-                    <td className="p-3">{desc.des_id}</td>
-                    <td className="p-3 text-wrap">{desc.description}</td>
+                  <tr key={desc.des_id} className="border hover:bg-gray-100">
+                    <td className="p-3 border">{desc.des_id}</td>
+                    <td className="p-3 border text-wrap">{desc.description}</td>
                     
                   </tr>
                 ))}

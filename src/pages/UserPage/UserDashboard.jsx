@@ -9,7 +9,6 @@ const UserDashboard = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [properties, setProperties] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const token = localStorage.getItem("token");
@@ -26,9 +25,57 @@ const UserDashboard = () => {
     priceRange: [1000, 1000000],
     anyPrice: true,
   });
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [isEast, setIsEast] = useState(true);
+  const [isWest, setIsWest] = useState(false);
+  const [minArea, setMinArea] = useState("");
+  const [maxArea, setMaxArea] = useState("");
+  const [category, setCategory] = useState("");
+  const [funUnfurn, setFunUnfurn] = useState("");
+  const [llOutright, setLlOutright] = useState("");
+  const [FilterArea, setFilterArea] = useState([]);
+  const [filerData, setFilterData] = useState([]);
+  const [showfilterdata, setshowfilterData] = useState(false);
+  const fetchfilter = async () => {
+    try {
+      console.log(from);
+      console.log(to);
+      const response = await axios.get(
+        `/api/get_all_properties_by_area/?from_area=${from}&to_area=${to}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setFilterData(response.data);
+      setshowfilterData(true);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const applyFilter = () => {
+    fetchfilter();
+    showFilter();
+  };
+
+  const FetchfilterArea = async () => {
+    try {
+      const response = await axios("/api/filter_area/");
+      console.log(response.data, "filterdata");
+      setFilterArea(response.data);
+    } catch (e) {
+      console.log("error", e);
+    }
+  };
 
   useEffect(() => {
     fetchProperties();
+    FetchfilterArea();
   }, []);
 
   const showFilter = () => {
@@ -101,8 +148,9 @@ const UserDashboard = () => {
 
   const getFilteredProperties = () => {
     return properties.filter((property) => {
-
-      const rateBuyNumeric = parseFloat(property.rate_buy.replace(/[^0-9.-]+/g, ""));
+      const rateBuyNumeric = parseFloat(
+        property.rate_buy.replace(/[^0-9.-]+/g, "")
+      );
       // Apply search term filter
       const matchesSearch = Object.values(property).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
@@ -121,9 +169,9 @@ const UserDashboard = () => {
       const matchesCity = !filters.city || property.city_name === filters.city;
 
       const matchesPrice =
-      filters.anyPrice ||
-      (rateBuyNumeric >= filters.priceRange[0] &&
-        rateBuyNumeric <= filters.priceRange[1]);
+        filters.anyPrice ||
+        (rateBuyNumeric >= filters.priceRange[0] &&
+          rateBuyNumeric <= filters.priceRange[1]);
 
       // All filters must match
       return (
@@ -143,7 +191,6 @@ const UserDashboard = () => {
   // Handler for filter updates from sidebar
   const handleFilterUpdate = (newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    // Reset the dropdown selection when sidebar filters change
     setSelectedPropertyType("");
   };
 
@@ -158,14 +205,29 @@ const UserDashboard = () => {
   const filteredProperties = getFilteredProperties();
 
   const showContactDetails = (property) => {
+    const efficiency =
+      property.efficiency || property.areas?.[0]?.efficiency || "-";
+    const rate_buy =
+      property.rate_buy || property.areas?.[0]?.outright_rate_psf || "-";
+    const rate_lease =
+      property.rate_lease || property.areas?.[0]?.rental_psf || "-";
+    const floor =
+      property.floor || property.areas?.[0]?.floor_wing_unit_number || "-";
+    const car_parking =
+      property.car_parking || property.areas?.[0]?.car_parking || "-";
+    const builtup =
+      property.builtup || property.areas?.[0]?.built_up_area || "-";
+    const carpet =
+      property.carpet || property.areas?.[0]?.carpet_up_area || "-";
+    const reopen = property.reopen || property.reopen_data || "-";
+
     Swal.fire({
       title: `<h2 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Property Details</h2>`,
       html: `
         <div style="text-align: left; font-size: 16px; color: #2c3e50; line-height: 1.6;">
-          <p><strong>Location:</strong> ${property.areas_name}</p>
-          <p><strong>Efficiency:</strong> ${property.efficiency}%</p>
-          <p><strong>Buy Rate:</strong> ${property.rate_buy}</p>
-          <p><strong>Lease Rate:</strong> ${property.rate_lease}</p>
+          <p><strong>Efficiency:</strong> ${efficiency}%</p>
+          <p><strong>Buy Rate:</strong> ${rate_buy}</p>
+          <p><strong>Lease Rate:</strong> ${rate_lease}</p>
   
           <div style="margin-top: 10px; padding: 4px;  border-radius: 6px;">
             <strong style="font-size: 17px;">Floor Details:</strong>
@@ -175,24 +237,40 @@ const UserDashboard = () => {
                 <th style="padding: 3px; border: 1px solid #ccc;">Unit No.</th>
                 <th style="padding: 3px; border: 1px solid #ccc;">Wing</th>
               </tr>
-              ${property.floor
-                .map(
-                  (ele) => `
+              ${
+                Array.isArray(floor)
+                  ? floor
+                      .map(
+                        (ele) => `
                   <tr>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.floor}</td>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.unit_number}</td>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.wing}</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
+                      ele.floor || "-"
+                    }</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
+                      ele.unit_number || "-"
+                    }</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
+                      ele.wing || "-"
+                    }</td>
                   </tr>
                 `
-                )
-                .join("")}
+                      )
+                      .join("")
+                  : `
+                <tr>
+                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${floor}</td>
+                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">-</td>
+                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">-</td>
+                </tr>
+              `
+              }
             </table>
           </div>
   
-          <p><strong>Car Parking:</strong> ${property.car_parking}</p>
-          <p><strong>Builtup Area:</strong> ${property.builtup} sqft</p>
-          <p><strong>Carpet Area:</strong> ${property.carpet} sqft</p>
-          <p><strong>Reopen Date:</strong> ${property.reopen}</p>
+          <p><strong>Car Parking:</strong> ${car_parking}</p>
+          <p><strong>Builtup Area:</strong> ${builtup} sqft</p>
+          <p><strong>Carpet Area:</strong> ${carpet} sqft</p>
+          <p><strong>Reopen Date:</strong> ${reopen}</p>
           
           <hr style="border-top: 1px solid #dcdcdc; margin: 10px 0;"/>
         </div>`,
@@ -219,6 +297,14 @@ const UserDashboard = () => {
 
       <div className="w-[100%] overflow-y-scroll">
         <div className="pb-20 pl-20 mx-2 my-24 ">
+          <div className="flex gap-8 -mt-14 mb-7">
+            <button className="text-xl text-gray-400 border-blue-900 hover:text-blue-900 hover:border-b-2">
+              Properties
+            </button>
+            <button className="text-xl text-gray-400 hover:text-blue-900 hover:border-blue-900 hover:border-b-2 ">
+              Clients
+            </button>
+          </div>
           <div className="flex justify-between h-10 ">
             <div className="w-[100%] flex gap-2">
               <select
@@ -238,21 +324,137 @@ const UserDashboard = () => {
               <label className=" border border-gray-300 text-gray-400 rounded p-2 ml-6 w-[50%]">
                 <option>Location</option>
               </label>
-              <div className="relative top-0 w-full cursor-pointer right-[49px]">
+              <div className="relative w-full cursor-pointer right-[44px] top-[2px]">
                 <div onClick={showFilter}>
                   <img
                     src="./LeftColumn/Filter.png"
                     alt=""
-                    className="h-[40px]"
+                    className="h-[35px]"
                   />
                 </div>
                 {filter && (
-                  <SearchFilter
-                    propertyTypeShow={propertyTypeShow}
-                    setPropertyTypeShow={setPropertyTypeShow}
-                    filterpropertyInput={filterpropertyInput}
-                    setFilterPropertyInput={setFilterPropertyInput}
-                  />
+                  <div className="absolute z-20 p-4 bg-white border rounded-md shadow-xl">
+                    <h1 className="mb-3 text-lg font-semibold">
+                      Locality range
+                    </h1>
+
+                    <div className="flex items-center gap-2 mb-3">
+                      <select onChange={(e) => setFrom(e.target.value)}>
+                        <option>From</option>
+
+                        {FilterArea.map((area) => (
+                          <option key={area.property_code}>
+                            {area.area_name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button className="p-2 text-white bg-blue-600 rounded">
+                        ⇆
+                      </button>
+                      <select onChange={(e) => setTo(e.target.value)}>
+                        <option>To</option>
+
+                        {FilterArea.map((area) => (
+                          <>
+                            <option key={area.property_code}>
+                              {area.area_name}
+                            </option>
+                          </>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-4 mb-3">
+                      <label className="flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={isEast}
+                          onChange={() => setIsEast(!isEast)}
+                        />{" "}
+                        East
+                      </label>
+                      <label className="flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={isWest}
+                          onChange={() => setIsWest(!isWest)}
+                        />{" "}
+                        West
+                      </label>
+                    </div>
+
+                    <div className="flex gap-3 ">
+                      <div className="w-[50%] mt-4">
+                        <h2 className="text-gray-600 ">Area Range</h2>
+                        <div className="flex gap-2 mt-2 mb-3">
+                          <input
+                            type="text"
+                            placeholder="Min"
+                            value={minArea}
+                            onChange={(e) => setMinArea(e.target.value)}
+                            className="w-1/2 p-2 border rounded"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Max"
+                            value={maxArea}
+                            onChange={(e) => setMaxArea(e.target.value)}
+                            className="w-1/2 p-2 border rounded"
+                          />
+                          <span className=" flex items-center text-gray-500 w-[20%] ">
+                            sq ft
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="w-[50%] mt-4">
+                        <h2 className="text-gray-600">Category</h2>
+                        <input
+                          type="text"
+                          placeholder="Input text"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          className="w-full p-2 mt-2 mb-3 border rounded"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="w-[50%] mt-4">
+                        <h2 className="text-gray-600">Fun/Unfurn</h2>
+                        <input
+                          type="text"
+                          placeholder="Input text"
+                          value={funUnfurn}
+                          onChange={(e) => setFunUnfurn(e.target.value)}
+                          className="w-full p-2 mt-2 mb-3 border rounded"
+                        />
+                      </div>
+                      <div className="w-[50%] mt-4">
+                        <h2 className="text-gray-600">LL/Outright</h2>
+                        <input
+                          type="text"
+                          placeholder="Input text"
+                          value={llOutright}
+                          onChange={(e) => setLlOutright(e.target.value)}
+                          className="w-full p-2 mt-2 mb-3 border rounded"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-10 mt-8 mb-6">
+                      <button className="text-red-600" onClick={showFilter}>
+                        Cancel
+                      </button>
+                      <button
+                        className="px-4 py-2 text-white bg-blue-800 rounded"
+                        onClick={applyFilter}
+                      >
+                        Apply filters
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -286,7 +488,7 @@ const UserDashboard = () => {
                       <th className="px-4 border">City</th>
                       <th className="px-4 border">East/West</th>
                       <th className="px-4 border">Address</th>
-                      {/* <th className="px-4 border">Location</th> */}
+                      <th className="px-4 border">Location</th>
                       <th className="px-4 border">Sublocation</th>
                       <th className="px-4 border">Description</th>
                       <th className="px-4 border">LL/Outright</th>
@@ -303,69 +505,139 @@ const UserDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProperties.map((property, index) => (
-                      <tr
-                        key={index}
-                        className="cursor-pointer hover:bg-gray-50"
-                        onClick={() => showContactDetails(property)}
-                      >
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.building}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.city_name}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.east_west}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.address}
-                        </td>
-
-                        {/* <td className="px-4 py-2 border text-wrap">
-                          {property.location}
-                        </td> */}
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.area_name}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.description}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.outright}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.property_type}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.poss_status}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.company_builder_name}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.builderaddress}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.contact_person1}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.conatact_person_number_1}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.contact_person2}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.conatact_person_number_2}
-                        </td>
-                        <td className="px-4 py-2 break-all border text-wrap">
-                          {property.email}
-                        </td>
-                        <td className="px-4 py-2 border text-wrap">
-                          {property.reffered_by}
+                    {filteredProperties.length === 0 ? (
+                      <tr>
+                        <td colSpan="11" className="py-4 text-center">
+                          <h3>No properties are there</h3>
                         </td>
                       </tr>
-                    ))}
+                    ) : showfilterdata ? (
+                      filerData.map((property, index) => (
+                        <tr
+                          key={index}
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => showContactDetails(property)}
+                        >
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.building_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.city}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.east_west}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.full_address}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.areas?.[0]?.area_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.sublocation}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.description}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.LL_outright}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.property_type}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.poss_status}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.company_builder_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.address}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.conatact_person_1}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.conatact_person_number_1}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.conatact_person_2}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.conatact_person_number_2}
+                          </td>
+                          <td className="px-4 py-2 break-all border text-wrap">
+                            {property.contacts?.[0]?.email}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contacts?.[0]?.reffered_by}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      filteredProperties.map((property, index) => (
+                        <tr
+                          key={index}
+                          className="cursor-pointer hover:bg-gray-50"
+                          onClick={() => showContactDetails(property)}
+                        >
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.building}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.city_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.east_west}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.address}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.areas_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.area_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.description}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.outright}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.property_type}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.poss_status}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.company_builder_name}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.builderaddress}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contact_person1}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.conatact_person_number_1}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.contact_person2}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.conatact_person_number_2}
+                          </td>
+                          <td className="px-4 py-2 break-all border text-wrap">
+                            {property.email}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            {property.reffered_by}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               )}
