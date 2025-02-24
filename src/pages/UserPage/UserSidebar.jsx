@@ -3,9 +3,16 @@ import Slider from "@mui/material/Slider";
 import { Box } from "@mui/material";
 import { useLogin } from "../../hooks/LoginContext";
 
-const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFilters, onFilterChange }) => {
+const UserSidebar = ({
+  properties = [],
+  currentFilters,
+  onFilterChange,
+}) => {
   const MIN_PRICE = 1000;
   const MAX_PRICE = 1000000;
+  const MIN_SQFT = 0;
+  const MAX_SQFT = 100000;
+  const [squareSize, setSquareSize] = useState(["", ""]);
   const [priceRange, setPriceRange] = useState([MIN_PRICE, MAX_PRICE]);
   const [anyPrice, setAnyPrice] = useState(false);
   const { logout } = useLogin();
@@ -19,6 +26,7 @@ const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFil
     // Sync priceRange with currentFilters from parent
     setPriceRange(currentFilters.priceRange);
     setAnyPrice(currentFilters.anyPrice);
+    setSquareSize(currentFilters.areaSize  || [MIN_SQFT, MAX_SQFT]);
   }, [currentFilters]);
 
   const handleAnyPriceChange = (event) => {
@@ -35,7 +43,15 @@ const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFil
   // Handle price range slider change
   const handlePriceChange = (event, newValue) => {
     setPriceRange(newValue);
-    onFilterChange({ priceRange: newValue , anyPrice: false}); // Propagate the change to the parent component
+    onFilterChange({ priceRange: newValue, anyPrice: false }); // Propagate the change to the parent component
+  };
+
+  //Handle carpet size update 
+  const handleCarpetSizeChange = (index, value) => {
+    const updatedSize = [...squareSize];
+    updatedSize[index] = value; // Ensure it's a number
+    setSquareSize(updatedSize);
+    onFilterChange({ areaSize: updatedSize }); // Send update to parent
   };
 
   // Handle city selection
@@ -133,6 +149,7 @@ const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFil
           </div>
         </div>
 
+        {/* Price Range filter  */}
         <div className="w-full max-w-sm p-3">
           <label className="block mb-2 font-medium text-gray-500">
             Price Range
@@ -187,17 +204,29 @@ const UserSidebar = ({ properties = [], setFilteredPropertiesSidebar, currentFil
             <input
               type="number"
               placeholder="Min"
+              min={MIN_SQFT}
+              max={MAX_SQFT}
+              value={squareSize[0]}
+              onChange={(e) => handleCarpetSizeChange(0, e.target.value)}
               className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <input
               type="number"
               placeholder="Max"
+              min={MIN_SQFT}
+              max={MAX_SQFT}
+              value={squareSize[1]}
+              onChange={(e) => handleCarpetSizeChange(1, e.target.value)}
               className="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <span className="w-[20%] items-center flex text-gray-500">
               sq ft
             </span>
           </div>
+          {/* <div className="flex items-center justify-between -mt-4 text-sm text-gray-500">
+            <div>₹{squareSize[0].toLocaleString()}</div>
+            <div>₹{squareSize[1].toLocaleString()}</div>
+          </div> */}
         </div>
 
         {/* Logout Button */}
