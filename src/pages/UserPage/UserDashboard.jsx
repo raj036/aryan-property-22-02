@@ -11,6 +11,9 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const token = localStorage.getItem("token");
+  const [filteredPropertiesSidebar, setFilteredPropertiesSidebar] = useState(
+    []
+  );
   const [filter, setFilter] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState("");
   const [filters, setFilters] = useState({
@@ -27,15 +30,12 @@ const UserDashboard = () => {
   const MIN_SQFT = 0;
   const MAX_SQFT = 100000;
   const [squareSize, setSquareSize] = useState(["", ""]);
-  const [category, setCategory] = useState("");
   const [funUnfurn, setFunUnfurn] = useState("");
-  const [llOutright, setLlOutright] = useState("");
   const [FilterArea, setFilterArea] = useState([]);
-  const [filerData, setFilterData] = useState([]);
   const [showfilterdata, setshowfilterData] = useState(false);
-  const [allProperties, setAllProperties] = useState([]);
   const [selectedLLOutright, setSelectedLLOutright] = useState(""); // State for LL/Outright
   const [propertyTypes, setPropertyTypes] = useState([]);
+  const [shouldRefreshFilters, setShouldRefreshFilters] = useState(false);
 
   const fetchPropertyTypes = async () => {
     try {
@@ -50,95 +50,8 @@ const UserDashboard = () => {
     fetchPropertyTypes();
   }, []);
 
-
-  // const fetchfilter = async () => {
-  //   try {
-  //     // console.log(from);
-  //     // console.log(to);
-  //     const response = await axios.get(
-  //       `/api/get_all_properties_by_area/?from_area=${from}&to_area=${to}`,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-  //     // console.log(response.data);
-  //     setFilterData(response.data);
-  //     setshowfilterData(true);
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
-
-  const fetchfilter = async () => {
-    try {
-      const response = await axios.get(
-        `/api/get_all_properties_by_area/?from_area=${from}&to_area=${to}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Client-side filtering for carpet area
-      let filteredData = [...response.data];
-
-      // Filter by carpet size if values are provided
-      if (squareSize[0] || squareSize[1]) {
-        const minArea = squareSize[0] ? Number(squareSize[0]) : MIN_SQFT;
-        const maxArea = squareSize[1] ? Number(squareSize[1]) : MAX_SQFT;
-
-        filteredData = filteredData.filter((property) => {
-          // Get carpet area from the property
-          const carpetArea = property.areas?.[0]?.carpet_up_area;
-          if (!carpetArea || carpetArea === "-") return true;
-
-          // Convert carpet area to number
-          const numericCarpet =
-            typeof carpetArea === "string"
-              ? parseFloat(carpetArea.replace(/[^0-9.-]+/g, ""))
-              : Number(carpetArea);
-
-          // Check if carpet area is within range
-          return numericCarpet >= minArea && numericCarpet <= maxArea;
-        });
-      }
-
-      // Apply East/West filter if selected
-      if (isEast && !isWest) {
-        filteredData = filteredData.filter(
-          (property) => property.east_west === "East"
-        );
-      } else if (isWest && !isEast) {
-        filteredData = filteredData.filter(
-          (property) => property.east_west === "West"
-        );
-      }
-      setFilterData(filteredData);
-      setshowfilterData(true);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  // filter data on basis of Carpet Area
-  const handleCarpetSizeChange = (index, value) => {
-    const updatedSize = [...squareSize];
-    updatedSize[index] = value; // Ensure it's a number
-    setSquareSize(updatedSize);
-
-    setFilters((prev) => ({
-      ...prev,
-      areaSize: updatedSize,
-    }));
-  };
-
   const applyFilter = () => {
-    fetchfilter();
+    fetchProperties();
     showFilter();
   };
 
@@ -157,18 +70,26 @@ const UserDashboard = () => {
     FetchfilterArea();
   }, []);
 
-  const showFilter = () => {
-    setFilter(!filter);
-  };
+  useEffect(() => {
+    if (shouldRefreshFilters) {
+      // No need to fetch from API again, just update filtered properties
+      const filtered = getFilteredProperties();
+      setFilteredPropertiesSidebar(filtered);
+      setShouldRefreshFilters(false);
+    }
+  }, [filters, shouldRefreshFilters]);
 
   const fetchProperties = async () => {
     try {
-      const response = await axios.get("/api/get_all_properties/", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `/api/get_all_properties/?from_area=${from}&to_area=${to}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       // console.log(response.data);
 
       if (!response.data) throw new Error("No data received");
@@ -213,6 +134,7 @@ const UserDashboard = () => {
       }));
       console.log(transformedProperties);
       setProperties(transformedProperties);
+      setFilteredPropertiesSidebar(transformedProperties);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching properties:", err);
@@ -236,7 +158,7 @@ const UserDashboard = () => {
         !selectedPropertyType ||
         property.property_type === selectedPropertyType;
 
-        const matchesLLOutright =
+      const matchesLLOutright =
         !selectedLLOutright || property.outright === selectedLLOutright;
 
       const matchesFunUnfurn = !funUnfurn || property.description === funUnfurn;
@@ -249,7 +171,8 @@ const UserDashboard = () => {
 
       const matchesPrice =
         filters.anyPrice ||
-        (rateBuyNumeric >= filters.priceRange[0] &&
+        (typeof rateBuyNumeric === "number" &&
+          rateBuyNumeric >= filters.priceRange[0] &&
           rateBuyNumeric <= filters.priceRange[1]);
 
       const matchesAreaSize =
@@ -263,11 +186,27 @@ const UserDashboard = () => {
         matchesSidebarPropertyType &&
         matchesCity &&
         matchesPrice &&
-        matchesAreaSize && 
+        matchesAreaSize &&
         matchesFunUnfurn &&
         matchesLLOutright
       );
     });
+  };
+
+  // filter data on basis of Carpet Area
+  const handleCarpetSizeChange = (index, value) => {
+    const updatedSize = [...squareSize];
+    updatedSize[index] = value; // Ensure it's a number
+    setSquareSize(updatedSize);
+
+    setFilters((prev) => ({
+      ...prev,
+      areaSize: updatedSize,
+    }));
+  };
+
+  const showFilter = () => {
+    setFilter(!filter);
   };
 
   useEffect(() => {
@@ -279,17 +218,27 @@ const UserDashboard = () => {
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
-      areaSize: squareSize.length ? squareSize : [MIN_SQFT, MAX_SQFT],
     }));
-    setSelectedPropertyType("");
+
+    // Reset dropdown property type if sidebar property type is set
+    if (newFilters.propertyType) {
+      setSelectedPropertyType("");
+    }
+
+    // Trigger re-filtering
+    setShouldRefreshFilters(true);
   };
 
   const handlePropertyTypeChange = (e) => {
     const newValue = e.target.value;
     setSelectedPropertyType(newValue);
-    setFilters((prev) => ({ ...prev, propertyType: "" }));
-  };
 
+    // Reset sidebar property type filter
+    setFilters((prev) => ({ ...prev, propertyType: "" }));
+
+    // Trigger re-filtering
+    setShouldRefreshFilters(true);
+  };
   // console.log(handleFilterUpdate);
 
   const filteredProperties = getFilteredProperties();

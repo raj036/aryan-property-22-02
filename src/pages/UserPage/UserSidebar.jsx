@@ -3,11 +3,7 @@ import Slider from "@mui/material/Slider";
 import { Box } from "@mui/material";
 import { useLogin } from "../../hooks/LoginContext";
 
-const UserSidebar = ({
-  properties = [],
-  currentFilters,
-  onFilterChange,
-}) => {
+const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
   const MIN_PRICE = 1000;
   const MAX_PRICE = 1000000;
   const MIN_SQFT = 0;
@@ -26,7 +22,8 @@ const UserSidebar = ({
     // Sync priceRange with currentFilters from parent
     setPriceRange(currentFilters.priceRange);
     setAnyPrice(currentFilters.anyPrice);
-    setSquareSize(currentFilters.areaSize  || [MIN_SQFT, MAX_SQFT]);
+    console.log(currentFilters, "data filtered");
+    setSquareSize(currentFilters.areaSize || [MIN_SQFT, MAX_SQFT]);
   }, [currentFilters]);
 
   const handleAnyPriceChange = (event) => {
@@ -46,7 +43,7 @@ const UserSidebar = ({
     onFilterChange({ priceRange: newValue, anyPrice: false }); // Propagate the change to the parent component
   };
 
-  //Handle carpet size update 
+  //Handle carpet size update
   const handleCarpetSizeChange = (index, value) => {
     const updatedSize = [...squareSize];
     updatedSize[index] = value; // Ensure it's a number
