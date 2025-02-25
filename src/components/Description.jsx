@@ -125,7 +125,7 @@ const Descriptions = () => {
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
           />
-          {error && <p className="mt-2 text-red-500">{error}</p>}
+          {/* {error && <p className="mt-2 text-red-500">{error}</p>} */}
           <div className="flex justify-end ">
             <button
               onClick={handleAddDescription}

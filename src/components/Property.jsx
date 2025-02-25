@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import PropertyForm from "./PropertyForm";
 import axios from "../helper/axios";
 import Swal from "sweetalert2";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 
 const Property = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -15,7 +17,6 @@ const Property = () => {
     fetchProperties();
   }, []);
 
-
   const fetchProperties = async () => {
     try {
       const response = await axios.get("/api/get_all_properties/", {
@@ -24,17 +25,17 @@ const Property = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data)
+      console.log(response.data);
 
       if (!response.data) throw new Error("No data received");
 
       // Transform the API response to match the expected structure
       const transformedProperties = response.data.map((property) => ({
-        // project_name: property.building_name || "-",
         building: property.building_name || "-",
         address: property.full_address || "-",
         city_name: property.city || "-",
         location: property.location || "-",
+        property_code: property.property_code || "-",
         area_name: property.sublocation || "-",
         property_type: property.property_type || "-",
         lease_type: property.LL_outright || "-",
@@ -49,8 +50,6 @@ const Property = () => {
         east_west: property.east_west || "-",
         reopen: property.reopen_data || "-",
         floor: property.areas[0]?.floor_wing_unit_number || "-",
-        // wing: property.areas[0]?.floor_wing_unit_number?.wing || "-",
-        // unit_no: property.areas[0]?.floor_wing_unit_number?.unit_number || "-",
         car_parking: property.areas[0]?.car_parking || "-",
         efficiency: property.areas[0]?.efficiency || "-",
         areas_name: property.areas[0]?.area_name || "-",
@@ -60,15 +59,16 @@ const Property = () => {
         contact_person1: property.contacts[0]?.conatact_person_1 || "-",
         contact_person2: property.contacts[0]?.conatact_person_2 || "-",
         company_builder_name: property.contacts[0]?.company_builder_name || "-",
-        conatact_person_number_1: property.contacts[0]?.conatact_person_number_1 || "-",
-        conatact_person_number_2: property.contacts[0]?.conatact_person_number_2 || "-",
+        conatact_person_number_1:
+          property.contacts[0]?.conatact_person_number_1 || "-",
+        conatact_person_number_2:
+          property.contacts[0]?.conatact_person_number_2 || "-",
         builderaddress: property.contacts[0]?.address || "-",
         email: property.contacts[0]?.email || "-",
         reffered_by: property.contacts[0]?.reffered_by || "-",
         contact_person_address: property.contacts[0]?.address || "-",
-
       }));
-      console.log(transformedProperties)
+      console.log(transformedProperties);
       setProperties(transformedProperties);
       setLoading(false);
     } catch (err) {
@@ -82,6 +82,35 @@ const Property = () => {
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+  const handleDelete = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`/api/delete_property/${id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            Swal.fire("Deleted!", "Property deleted successfully", "success");
+            fetchProperties();
+          })
+          .catch(() => {
+            Swal.fire("Error!", "Failed to delete property", "error");
+          });
+      }
+    });
+  };
 
   const showContactDetails = (property) => {
     Swal.fire({
@@ -132,7 +161,7 @@ const Property = () => {
       },
     });
   };
-  
+
   return (
     <div className="pb-20 pl-20 mx-10 my-24 ">
       <div className="flex justify-between h-10 ">
@@ -194,6 +223,7 @@ const Property = () => {
                   <th className="px-4 border">Person2 Contact</th>
                   <th className="px-4 border text-wrap">Email</th>
                   <th className="px-4 border text-wrap">Reffered By</th>
+                  <th className="px-4 border text-wrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,7 +252,7 @@ const Property = () => {
                       <td className="px-4 py-2 border text-wrap">
                         {property.address}
                       </td>
-                      
+
                       <td className="px-4 py-2 border text-wrap">
                         {property.areas_name}
                       </td>
@@ -248,7 +278,7 @@ const Property = () => {
                         {property.builderaddress}
                       </td>
                       <td className="px-4 py-2 border text-wrap">
-                        {property. contact_person1}
+                        {property.contact_person1}
                       </td>
                       <td className="px-4 py-2 border text-wrap">
                         {property.conatact_person_number_1}
@@ -264,6 +294,25 @@ const Property = () => {
                       </td>
                       <td className="px-4 py-2 border text-wrap">
                         {property.reffered_by}
+                      </td>
+                      <td className="px-4 py-2 border text-wrap">
+                        <div className="flex justify-center gap-4">
+                          <FaEdit
+                            className="text-blue-600 cursor-pointer"
+                            // onClick={(e) => {
+                            //   e.stopPropagation();
+                            //   handleEdit(property.property_code);
+                            // }}
+                            onClick={(e)=> e.stopPropagation()}
+                          />
+                          <MdDelete
+                            className="text-red-600 cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(property?.property_code);
+                            }}
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))

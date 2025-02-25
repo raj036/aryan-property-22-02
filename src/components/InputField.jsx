@@ -119,7 +119,7 @@ const InputField = () => {
                 value={newPropertyType}
                 onChange={(e) => setNewPropertyType(e.target.value)}
               />
-              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+              {/* {error && <p className="mt-2 text-sm text-red-500">{error}</p>} */}
               <div className="flex justify-center">
                 <button
                   onClick={handleSave}

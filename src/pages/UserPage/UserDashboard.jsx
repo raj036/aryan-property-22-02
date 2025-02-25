@@ -52,7 +52,7 @@ const UserDashboard = () => {
 
   const applyFilter = () => {
     fetchProperties();
-    showFilter();
+    // showFilter();
   };
 
   const FetchfilterArea = async () => {
@@ -208,6 +208,11 @@ const UserDashboard = () => {
   const showFilter = () => {
     setFilter(!filter);
   };
+  useEffect(() => {
+    if (to) {
+      applyFilter();
+    }
+  }, [to]);
 
   useEffect(() => {
     // console.log("Filters updated:", filters);
@@ -371,7 +376,7 @@ const UserDashboard = () => {
                   />
                 </div>
                 {filter && (
-                  <div className="absolute z-20 p-4 bg-white border border-gray-300 rounded-md shadow-xl">
+                  <div className="absolute z-20 p-4 bg-white border border-gray-300 rounded-md shadow-xl right-[95%] top-[140%]">
                     <h1 className="mb-3 text-lg font-semibold">
                       Locality range
                     </h1>
@@ -518,17 +523,17 @@ const UserDashboard = () => {
                     </div>
                     <div className="flex items-center justify-center gap-10 mt-8 mb-6">
                       <button
-                        className="text-red-600 transition-colors hover:text-red-700"
+                        className="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700"
                         onClick={showFilter}
                       >
                         Cancel
                       </button>
-                      <button
+                      {/* <button
                         className="px-4 py-2 text-white transition-colors bg-blue-800 rounded-md hover:bg-blue-900"
                         onClick={applyFilter}
                       >
                         Apply filters
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 )}
