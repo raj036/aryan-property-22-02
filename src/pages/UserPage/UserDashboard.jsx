@@ -3,6 +3,8 @@ import PropertyForm from "../../components/PropertyForm";
 import axios from "../../helper/axios";
 import Swal from "sweetalert2";
 import UserSidebar from "./UserSidebar.jsx";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 
 const UserDashboard = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -17,7 +19,7 @@ const UserDashboard = () => {
   const [filter, setFilter] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState("");
   const [filters, setFilters] = useState({
-    propertyType: "",
+    propertyType: [],
     city: "",
     priceRange: [1000, 1000000],
     anyPrice: true,
@@ -36,6 +38,8 @@ const UserDashboard = () => {
   const [selectedLLOutright, setSelectedLLOutright] = useState(""); // State for LL/Outright
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [shouldRefreshFilters, setShouldRefreshFilters] = useState(false);
+  const [editProperty, setEditProperty] = useState(false);
+  const [property, setProperty] = useState(null);
 
   const fetchPropertyTypes = async () => {
     try {
@@ -97,6 +101,7 @@ const UserDashboard = () => {
       // Transform the API response to match the expected structure
       const transformedProperties = response.data.map((property) => ({
         building: property.building_name || "-",
+        property_code: property.property_code || "-",
         address: property.full_address || "-",
         city_name: property.city || "-",
         location: property.location || "-",
@@ -164,8 +169,9 @@ const UserDashboard = () => {
       const matchesFunUnfurn = !funUnfurn || property.description === funUnfurn;
 
       const matchesSidebarPropertyType =
-        !filters.propertyType ||
-        property.property_type === filters.propertyType;
+      !filters.propertyType || 
+      filters.propertyType.length === 0 ||
+      filters.propertyType.includes(property.property_type);
 
       const matchesCity = !filters.city || property.city_name === filters.city;
 
@@ -226,7 +232,7 @@ const UserDashboard = () => {
     }));
 
     // Reset dropdown property type if sidebar property type is set
-    if (newFilters.propertyType) {
+    if (newFilters.propertyType && newFilters.propertyType.length > 0) {
       setSelectedPropertyType("");
     }
 
@@ -329,6 +335,36 @@ const UserDashboard = () => {
       },
     });
   };
+
+  const handleDelete = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`/api/delete_property/${id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            Swal.fire("Deleted!", "Property deleted successfully", "success");
+            fetchProperties();
+          })
+          .catch(() => {
+            Swal.fire("Error!", "Failed to delete property", "error");
+          });
+      }
+    });
+  };
+
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -482,7 +518,7 @@ const UserDashboard = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col w-[50%] mt-4">
                         <label htmlFor="funUnfurn" className="text-gray-600">
-                          Fun/Unfurn
+                          Description
                         </label>
                         <select
                           id="funUnfurn"
@@ -550,10 +586,13 @@ const UserDashboard = () => {
             </div>
           </div>
 
-          {showPropertyForm ? (
+          {showPropertyForm || editProperty ? (
             <PropertyForm
               setShowPropertyForm={setShowPropertyForm}
               onSubmit={fetchProperties}
+              setEditProperty={setEditProperty}
+          editProperty={editProperty}
+          property={property}
             />
           ) : (
             <div className="w-full overflow-x-auto">
@@ -583,6 +622,7 @@ const UserDashboard = () => {
                       <th className="px-4 border">Person2 Contact</th>
                       <th className="px-4 border text-wrap">Email</th>
                       <th className="px-4 border text-wrap">Reffered By</th>
+                      <th className="px-4 border text-wrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -652,6 +692,32 @@ const UserDashboard = () => {
                           </td>
                           <td className="px-4 py-2 border text-wrap">
                             {property.reffered_by}
+                          </td>
+                          <td className="px-4 py-2 border text-wrap">
+                            <div className="flex justify-center gap-4">
+                              <FaEdit
+                                className="text-blue-600 cursor-pointer"
+                                onClick={(e) => {
+                                  try {
+                                    e.stopPropagation();
+                                    setEditProperty(true);
+                                    setProperty(property);
+                                  } catch (error) {
+                                    console.error(
+                                      "Error in click handler:",
+                                      error
+                                    );
+                                  }
+                                }}
+                              />
+                              <MdDelete
+                                className="text-red-600 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(property?.property_code);
+                                }}
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))

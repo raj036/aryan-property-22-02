@@ -11,11 +11,32 @@ const Property = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editProperty, setEditProperty] = useState(false);
+  const [property, setProperty] = useState(null);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  const [selectedProperty, setSelectedProperty] = useState(null);
+
+  const handleUpdate = async (id) => {
+    try {
+      await axios.put(`/api/update_property/${id}`, updatedProperty, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      Swal.fire("Updated!", "Property updated successfully", "success");
+      fetchProperties(); // Refresh the data
+      setShowPropertyForm(false);
+      setSelectedProperty(null);
+    } catch (error) {
+      Swal.fire("Error!", "Failed to update property", "error");
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -190,10 +211,14 @@ const Property = () => {
         </div>
       </div>
 
-      {showPropertyForm ? (
+      {showPropertyForm || editProperty ? (
         <PropertyForm
           setShowPropertyForm={setShowPropertyForm}
-          onSubmit={fetchProperties}
+          onSubmit={selectedProperty ? handleUpdate : fetchProperties}
+          propertyData={selectedProperty}
+          setEditProperty={setEditProperty}
+          editProperty={editProperty}
+          property={property}
         />
       ) : (
         <div className="w-full overflow-x-auto">
@@ -299,11 +324,15 @@ const Property = () => {
                         <div className="flex justify-center gap-4">
                           <FaEdit
                             className="text-blue-600 cursor-pointer"
-                            // onClick={(e) => {
-                            //   e.stopPropagation();
-                            //   handleEdit(property.property_code);
-                            // }}
-                            onClick={(e)=> e.stopPropagation()}
+                            onClick={(e) => {
+                              try {
+                                e.stopPropagation();
+                                setEditProperty(true);
+                                setProperty(property);
+                              } catch (error) {
+                                console.error("Error in click handler:", error);
+                              }
+                            }}
                           />
                           <MdDelete
                             className="text-red-600 cursor-pointer"

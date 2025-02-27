@@ -245,13 +245,13 @@ const Client = () => {
 
       <div className="mt-6 overflow-x-auto">
         <table className="w-full text-center border border-gray-300">
-          <thead className="h-12 text-white bg-blue-800">
+          <thead className="w-full h-12 text-white bg-blue-800">
             <tr>
-              <th className="px-4 py-2 border">Name</th>
-              <th className="px-4 py-2 border">Email</th>
-              <th className="px-4 py-2 border">Contact Number</th>
-              <th className="px-4 py-2 border">Location</th>
-              <th className="px-4 py-2 border">Actions</th>
+              <th className="w-1/5 px-4 py-2 border">Name</th>
+              <th className="w-1/5 px-4 py-2 border">Email</th>
+              <th className="w-1/5 px-4 py-2 border">Contact Number</th>
+              <th className="w-1/5 px-4 py-2 border">Location</th>
+              <th className="w-1/5 px-4 py-2 border">Actions</th>
             </tr>
           </thead>
           <tbody className="mb-12">

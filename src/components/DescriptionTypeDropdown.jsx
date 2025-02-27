@@ -14,12 +14,9 @@ const DescriptionTypeDropdown = ({ onChange }) => {
   const fetchPropertyTypes = async () => {
     try {
       const response = await axios.get("/api/descriptions/");
-      // console.log(response.data);
-      // console.log(response.data.description);
       setPropertyTypes(response.data);
     } catch (error) {
       console.error("Error fetching descriptions:", error);
-      // Add error handling here
     }
   };
 
@@ -86,6 +83,7 @@ const DescriptionTypeDropdown = ({ onChange }) => {
               key={type.des_id} // Use des_code as key
               className="p-3 cursor-pointer hover:bg-blue-500 hover:text-white"
               onClick={() => handleTypeSelect(type)}
+              value={selectedType.description || ""}
             >
               {type.description}
             </div>

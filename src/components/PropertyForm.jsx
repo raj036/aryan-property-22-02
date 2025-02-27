@@ -8,14 +8,19 @@ import DescriptionTypeDropdown from "./DescriptionTypeDropdown";
 import { FaPlus } from "react-icons/fa";
 import { FaMinus } from "react-icons/fa";
 
-const PropertyForm = ({ setShowPropertyForm }) => {
+const PropertyForm = ({
+  setShowPropertyForm,
+  setEditProperty,
+  property,
+  editProperty,
+}) => {
   const tabs = ["AddProperty", "AreaDetails", "Contact"];
   const [activeTab, setActiveTab] = useState(0);
   const token = localStorage.getItem("token");
   const [FilterAreaData, setFilterAreaData] = useState([]);
   const [filterAreaId, setfilterAreaId] = useState(0);
 
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     building_name: "",
     full_address: "",
     sublocation: "",
@@ -56,8 +61,73 @@ const PropertyForm = ({ setShowPropertyForm }) => {
         ],
       },
     ],
-  });
+  };
+  const [formData, setFormData] = useState(initialFormState);
+  useEffect(() => {
+    // Load initial data when in edit mode
+    if (editProperty && property && Object.keys(property).length > 0) {
+      setFormData({
+        building_name: property.building || "",
+        full_address: property.address || "",
+        sublocation: property.area_name || "",
+        city: property.city_name || "",
+        des_code: "",
+        LL_outright: property.outright || "",
+        //property_type: property.property_type || "",
+        poss_status: property.poss_status || "",
+        east_west: property.east_west || "",
+        reopen_date: property.reopen || "",
+        description: "Under Maintence",
+        property_type: "Retail",
+        areas: [
+          {
+            filter_area_id: 1,
+            built_up_area: property.builtup || null,
+            carpet_up_area: property.carpet || null,
+            efficiency: property.efficiency || null,
+            car_parking: property.car_parking || "",
+            rental_psf: property.rate_lease || "",
+            outright_rate_psf: property.rate_buy || "",
+            // unit_floor_wing: [
+            //   {
+            //     wing: "",
+            //     floor: property.floor[0].floor || "",
+            //     unit_number: "",
+            //   },
+            // ],
 
+            // Ensure `property.floors` is an array before mapping
+            // eslint-disable-next-line react/prop-types
+            unit_floor_wing: Array.isArray(property.floor)
+              // eslint-disable-next-line react/prop-types
+              ? property?.floor.map((item) => ({
+                  wing: item.wing || "",
+                  floor: item.floor || "",
+                  unit_number: item.unit_number || "",
+                }))
+              : [],
+            contacts: [
+              {
+                company_builder_name: property.company_builder_name || "",
+                address: property.builderaddress || "",
+                conatact_person_1: property.contact_person1 || "",
+                conatact_person_2: property.contact_person2 || "",
+                conatact_person_number_1:
+                  property.conatact_person_number_1 || null,
+                conatact_person_number_2:
+                  property.conatact_person_number_2 || null,
+                email: property.email || "",
+                reffered_by: property.reffered_by || "",
+              },
+            ],
+          },
+        ],
+      });
+    } else {
+      // Use empty form for new property
+      setFormData(initialFormState);
+    }
+  }, [property, editProperty]);
   const FilterArea = async () => {
     try {
       const response = await axios.get("/api/filter_area/");
@@ -72,8 +142,16 @@ const PropertyForm = ({ setShowPropertyForm }) => {
     }
   };
 
+  // useEffect(() => {
+  //   console.log("property to edit" , property);
+  //   if (setEditProperty) {
+  //     setFormData(property);
+  //   }
+  // }, [property, setEditProperty]);
+
   useEffect(() => {
     FilterArea();
+    //console.log(property.property_code);
   }, []);
 
   const handlefilterAreaId = (location) => {
@@ -191,50 +269,106 @@ const PropertyForm = ({ setShowPropertyForm }) => {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
+    console.log("eddting start");
+    if (editProperty) {
+      console.log(property.property_code, "propertycode");
+      try {
+        const response = await axios.put(
+          `/api/update_property/${property.property_code}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    try {
-      const response = await axios.post(
-        "/api/add_property_with_hierarchy/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        // console.log(response);
+        // console.log(formData);
+        if (response?.data) {
+          console.log("done editting");
+          await Swal.fire({
+            icon: "success",
+            title: "Property data edited successfully",
+            text: "Redirecting...",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+
+          window.location.reload();
+          setFormData(initialFormState);
+          setShowPropertyForm(false);
+
+          setEditProperty(false);
         }
-      );
-
-      // console.log(response);
-      // console.log(formData);
-
-      if (response?.data) {
-        await Swal.fire({
-          icon: "success",
-          title: "Property data added successfully",
-          text: "Redirecting...",
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false,
+      } catch (error) {
+        console.log("error editting");
+        console.error("Error edittingform:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Property not editted",
+          text:
+            error.response?.data?.detail ||
+            "An error occurred. Please try again.",
         });
-        window.location.reload();
-        setShowPropertyForm(false);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Property not added",
-        text:
-          error.response?.data?.detail ||
-          "An error occurred. Please try again.",
-      });
+    } else {
+      console.log("adding start");
+      try {
+        const response = await axios.post(
+          "/api/add_property_with_hierarchy/",
+          formData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // console.log(response);
+        // console.log(formData);
+
+        if (response?.data) {
+          await Swal.fire({
+            icon: "success",
+            title: "Property data added successfully",
+            text: "Redirecting...",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+
+          window.location.reload();
+          setFormData(initialFormState);
+          setShowPropertyForm(false);
+
+          setEditProperty(false);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Property not added",
+          text:
+            error.response?.data?.detail ||
+            "An error occurred. Please try again.",
+        });
+      }
+      console.log("done");
     }
   };
 
   return (
     <div className="relative max-h-screen p-8 mt-1 rounded-lg shadow-md ">
       <button
-        onClick={() => setShowPropertyForm(false)}
+        onClick={() => {
+          setFormData(initialFormState);
+          setShowPropertyForm(false);
+          setEditProperty(false);
+        }}
         className="absolute top-5 right-2"
       >
         <MdCancel className="text-xl text-gray-500 hover:text-red-600" />
@@ -455,74 +589,71 @@ const PropertyForm = ({ setShowPropertyForm }) => {
             </div>
 
             {formData.areas[0].unit_floor_wing.map((unit, index) => (
-              <div
-                key={index}
-                className="flex gap-3"
-              >
+              <div key={index} className="flex gap-3">
                 <div className="flex space-x-4 w-[65%] mb-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Unit No"
-                  className="w-1/3 p-2 border rounded"
-                  name="unit_number"
-                  value={unit.unit_number}
-                  onChange={(e) => {
-                    const newUnits = [...formData.areas[0].unit_floor_wing];
-                    newUnits[index].unit_number = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      areas: [
-                        {
-                          ...prev.areas[0],
-                          unit_floor_wing: newUnits,
-                        },
-                      ],
-                    }));
-                  }}
-                />
+                  <input
+                    type="text"
+                    placeholder="Unit No"
+                    className="w-1/3 p-2 border rounded"
+                    name="unit_number"
+                    value={unit.unit_number}
+                    onChange={(e) => {
+                      const newUnits = [...formData.areas[0].unit_floor_wing];
+                      newUnits[index].unit_number = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        areas: [
+                          {
+                            ...prev.areas[0],
+                            unit_floor_wing: newUnits,
+                          },
+                        ],
+                      }));
+                    }}
+                  />
 
-                <input
-                  type="text"
-                  placeholder="Floor"
-                  className="w-1/3 p-2 border rounded"
-                  name="floor"
-                  value={unit.floor}
-                  onChange={(e) => {
-                    const newUnits = [...formData.areas[0].unit_floor_wing];
-                    newUnits[index].floor = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      areas: [
-                        {
-                          ...prev.areas[0],
-                          unit_floor_wing: newUnits,
-                        },
-                      ],
-                    }));
-                  }}
-                />
+                  <input
+                    type="text"
+                    placeholder="Floor"
+                    className="w-1/3 p-2 border rounded"
+                    name="floor"
+                    value={unit.floor}
+                    onChange={(e) => {
+                      const newUnits = [...formData.areas[0].unit_floor_wing];
+                      newUnits[index].floor = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        areas: [
+                          {
+                            ...prev.areas[0],
+                            unit_floor_wing: newUnits,
+                          },
+                        ],
+                      }));
+                    }}
+                  />
 
-                <input
-                  type="text"
-                  placeholder="Wing"
-                  className="w-1/3 p-2 border rounded"
-                  name="wing"
-                  value={unit.wing}
-                  onChange={(e) => {
-                    const newUnits = [...formData.areas[0].unit_floor_wing];
-                    newUnits[index].wing = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      areas: [
-                        {
-                          ...prev.areas[0],
-                          unit_floor_wing: newUnits,
-                        },
-                      ],
-                    }));
-                  }}
-                />
-</div>
+                  <input
+                    type="text"
+                    placeholder="Wing"
+                    className="w-1/3 p-2 border rounded"
+                    name="wing"
+                    value={unit.wing}
+                    onChange={(e) => {
+                      const newUnits = [...formData.areas[0].unit_floor_wing];
+                      newUnits[index].wing = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        areas: [
+                          {
+                            ...prev.areas[0],
+                            unit_floor_wing: newUnits,
+                          },
+                        ],
+                      }));
+                    }}
+                  />
+                </div>
                 {index > 0 && (
                   <button
                     onClick={() => {

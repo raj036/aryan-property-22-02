@@ -61,22 +61,37 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
 
   // Handle property type selection
   const handlePropertyTypeChange = (propertyType) => {
-    onFilterChange({ propertyType });
+    // Get current selected property types (or initialize empty array)
+    const currentTypes = Array.isArray(currentFilters.propertyType) 
+      ? [...currentFilters.propertyType] 
+      : [];
+    
+    let updatedTypes;
+    if (currentTypes.includes(propertyType)) {
+      // If already selected, remove it
+      updatedTypes = currentTypes.filter(type => type !== propertyType);
+    } else {
+      // If not selected, add it
+      updatedTypes = [...currentTypes, propertyType];
+    }
+    
+    onFilterChange({ propertyType: updatedTypes });
   };
+
 
   // Get unique cities from properties
   const availableCities = [...new Set(properties.map((p) => p.city_name))];
 
   // Get property types based on selected city
   const filteredPropertyTypes = currentFilters.city
-    ? [
-        ...new Set(
-          properties
-            .filter((p) => p.city_name === currentFilters.city)
-            .map((p) => p.property_type)
-        ),
-      ]
-    : [...new Set(properties.map((p) => p.property_type))];
+  ? [
+      ...new Set(
+        properties
+          .filter((p) => p.city_name === currentFilters.city)
+          .map((p) => p.property_type)
+      ),
+    ]
+  : [...new Set(properties.map((p) => p.property_type))];
 
   // Update current date every second
   useEffect(() => {
@@ -97,7 +112,7 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
   }, []);
 
   return (
-    <div className="flex transition-all duration-300">
+    <div className="flex transition-all duration-300 w-[20%]">
       <aside className="w-full p-[15px] bg-white border-r shadow-lg">
         <div className="flex items-center gap-4">
           <img
@@ -138,7 +153,7 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
                   type="checkbox"
                   value={type}
                   onChange={() => handlePropertyTypeChange(type)}
-                  checked={currentFilters.propertyType === type}
+                  checked={Array.isArray(currentFilters.propertyType) && currentFilters.propertyType.includes(type)}
                 />
                 <span className="mx-2">{type}</span>
               </label>

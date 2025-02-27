@@ -41,7 +41,7 @@ const User = () => {
     phone_no: "",
     user_password: "",
   });
-
+  
   const fetchUsers = async () => {
     try {
       const response = await axios.get("/api/get_all_users");
@@ -174,7 +174,7 @@ const User = () => {
     setIsEditOpen(true);
     setSelectedUser(user);
   };
-
+  
   const handleUpdateUser = async () => {
     if (!selectedUser?.user_id || !selectedUser?.user_type) {
       Swal.fire({
@@ -196,9 +196,10 @@ const User = () => {
         });
         return;
       }
-
+      // `/api/update_user_type/?user_id=${selectedUser.user_id}&user_type=${selectedUser.user_type}`,
+    
       const response = await axios.put(
-        `/api/update_user_type/?user_id=${selectedUser.user_id}&user_type=${selectedUser.user_type}`,
+       `/api/update_user_type/?user_id=${selectedUser.user_id}&user_type=${selectedUser.user_type}&new_password=${selectedUser.user_password}&phone_no=${selectedUser.phone_no}` ,
         {},
         {
           headers: {
@@ -356,7 +357,7 @@ const User = () => {
             <h1 className="pb-3">Phone Number</h1>
             <input
               className="p-2 border rounded-md"
-              type="text"
+              type="number"
               name="phone_no"
               value={inputData.phone_no}
               onChange={(e) =>
@@ -425,7 +426,12 @@ const User = () => {
                   className="p-2 bg-gray-100 border rounded-md"
                   type="text"
                   value={selectedUser.phone_no || ""}
-                  readOnly
+                  onChange={(e) =>
+                    setSelectedUser({
+                      ...selectedUser,
+                      phone_no: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div>
@@ -443,6 +449,22 @@ const User = () => {
                   <option value="admin">Admin</option>
                   <option value="user">User</option>
                 </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-around m-3">
+              <div>
+                <h1 className="pb-3">New Password</h1>
+                <input
+                  className="p-2 bg-gray-100 border rounded-md"
+                  type="text"
+                  value={selectedUser.user_password || ""}
+                  onChange={(e) =>
+                    setSelectedUser({
+                      ...selectedUser,
+                      user_password: e.target.value,
+                    })
+                  }
+                />
               </div>
             </div>
 

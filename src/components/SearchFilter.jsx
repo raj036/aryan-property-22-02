@@ -155,8 +155,8 @@ const SearchFilter = () => {
   const [llOutright, setLlOutright] = useState("");
 
   return (
-    <div className=" absolute p-4 bg-white border shadow-xl rounded-md">
-      <h1 className="text-lg font-semibold mb-3">Locality range</h1>
+    <div className="absolute p-4 bg-white border rounded-md shadow-xl ">
+      <h1 className="mb-3 text-lg font-semibold">Locality range</h1>
 
       <div className="flex items-center gap-2 mb-3">
         <input
@@ -164,15 +164,15 @@ const SearchFilter = () => {
           placeholder="From"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="border p-2 rounded w-full"
+          className="w-full p-2 border rounded"
         />
-        <button className="p-2 bg-blue-600 text-white rounded">⇆</button>
+        <button className="p-2 text-white bg-blue-600 rounded">⇆</button>
         <input
           type="text"
           placeholder="To"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="border p-2 rounded w-full"
+          className="w-full p-2 border rounded"
         />
       </div>
 
@@ -188,33 +188,33 @@ const SearchFilter = () => {
       <div className="flex gap-3 ">
         <div className="w-[50%] mt-4">
           <h2 className="text-gray-600 ">Area Range</h2>
-          <div className="flex gap-2 mb-3 mt-2">
-            <input type="text" placeholder="Min" value={minArea} onChange={(e) => setMinArea(e.target.value)} className="border p-2 rounded w-1/2" />
-            <input type="text" placeholder="Max" value={maxArea} onChange={(e) => setMaxArea(e.target.value)} className="border p-2 rounded w-1/2" />
+          <div className="flex gap-2 mt-2 mb-3">
+            <input type="text" placeholder="Min" value={minArea} onChange={(e) => setMinArea(e.target.value)} className="w-1/2 p-2 border rounded" />
+            <input type="text" placeholder="Max" value={maxArea} onChange={(e) => setMaxArea(e.target.value)} className="w-1/2 p-2 border rounded" />
             <span className=" flex items-center text-gray-500 w-[20%] ">sq ft</span>
           </div>
         </div>
 
         <div className="w-[50%] mt-4">
           <h2 className="text-gray-600">Category</h2>
-          <input type="text" placeholder="Input text" value={category} onChange={(e) => setCategory(e.target.value)} className="border p-2 rounded w-full mb-3 mt-2" />
+          <input type="text" placeholder="Input text" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-2 mt-2 mb-3 border rounded" />
         </div>
       </div>
 
       <div className="flex gap-3">
         <div className="w-[50%] mt-4">
-          <h2 className="text-gray-600">Fun/Unfurn</h2>
-          <input type="text" placeholder="Input text" value={funUnfurn} onChange={(e) => setFunUnfurn(e.target.value)} className="border p-2 rounded w-full mb-3 mt-2" />
+          <h2 className="text-gray-600">Description</h2>
+          <input type="text" placeholder="Input text" value={funUnfurn} onChange={(e) => setFunUnfurn(e.target.value)} className="w-full p-2 mt-2 mb-3 border rounded" />
         </div>
         <div className="w-[50%] mt-4">
           <h2 className="text-gray-600">LL/Outright</h2>
-          <input type="text" placeholder="Input text" value={llOutright} onChange={(e) => setLlOutright(e.target.value)} className="border p-2 rounded w-full mb-3 mt-2" />
+          <input type="text" placeholder="Input text" value={llOutright} onChange={(e) => setLlOutright(e.target.value)} className="w-full p-2 mt-2 mb-3 border rounded" />
         </div>
       </div>
 
-      <div className="flex justify-center items-center mt-8 mb-6 gap-10">
+      <div className="flex items-center justify-center gap-10 mt-8 mb-6">
         <button className="text-red-600">Cancel</button>
-        <button className="bg-blue-800 text-white px-4 py-2 rounded">Apply filters</button>
+        <button className="px-4 py-2 text-white bg-blue-800 rounded">Apply filters</button>
       </div>
     </div>
   );
