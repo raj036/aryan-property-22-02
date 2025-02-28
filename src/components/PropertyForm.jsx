@@ -101,10 +101,10 @@ const PropertyForm = ({
             unit_floor_wing: Array.isArray(property.floor)
               // eslint-disable-next-line react/prop-types
               ? property?.floor.map((item) => ({
-                  wing: item.wing || "",
-                  floor: item.floor || "",
-                  unit_number: item.unit_number || "",
-                }))
+                wing: item.wing || "",
+                floor: item.floor || "",
+                unit_number: item.unit_number || "",
+              }))
               : [],
             contacts: [
               {
@@ -378,13 +378,11 @@ const PropertyForm = ({
         {tabs.map((tab, index) => (
           <button
             key={index}
-            className={`flex-1 py-3 font-semibold rounded-md ${
-              index !== tabs.length - 1 ? "border-r-2" : ""
-            } ${
-              activeTab === index
+            className={`flex-1 py-3 font-semibold rounded-md ${index !== tabs.length - 1 ? "border-r-2" : ""
+              } ${activeTab === index
                 ? "text-white bg-blue-900"
                 : "hover:text-blue-700"
-            }`}
+              }`}
             onClick={() => setActiveTab(index)}
           >
             {tab.replace(/([A-Z])/g, " $1").trim()}
@@ -520,7 +518,7 @@ const PropertyForm = ({
           <form className="grid grid-cols-3 gap-6 mx-auto mt-6">
             <div className="space-y-4">
               <label className="block text-sm font-semibold">
-                Built up Area
+                Built up Area (sq.ft.)
               </label>
               <input
                 type="number"
@@ -530,13 +528,21 @@ const PropertyForm = ({
                 onChange={(e) => handleInputChange(e, "propertyDetails")}
               />
 
-              <label className="block text-sm font-semibold">Efficiency</label>
+              <label className="block text-sm font-semibold">Efficiency (%)</label>
               <input
                 type="number"
                 name="efficiency"
                 className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
                 value={formData.areas[0].efficiency}
                 onChange={(e) => handleInputChange(e, "propertyDetails")}
+              // onChange={(e) => {
+              //   let value = e;
+
+              //   // Allow only numbers and a single '%' symbol
+              //   if (/^\d*%?$/.test(value)) {
+              //     handleInputChange({ target: { name: "efficiency", value } }, "propertyDetails");
+              //   }
+              // }}
               />
 
               <label className="block text-sm font-semibold">Rental psf</label>
@@ -550,7 +556,7 @@ const PropertyForm = ({
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-semibold">Carpet Area</label>
+              <label className="block text-sm font-semibold">Carpet Area (sq.ft.)</label>
               <input
                 type="number"
                 name="carpet_up_area"
