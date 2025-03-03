@@ -125,7 +125,7 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId }) => {
         },
         content: {
           width: "70%",
-          height: "90%",
+          height: "fit-content",
           margin: "auto",
           borderRadius: "10px",
           boxShadow: "1px 1px 10px gray",
