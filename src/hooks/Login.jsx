@@ -108,7 +108,7 @@ const Login = () => {
           {/* Email Input */}
 
           <div className="flex items-center w-2/5 p-1 border-2 border-black rounded-md">
-            <img className="px-3" src="./LeftColumn/Email.png" alt="Email Icon" />
+            <img className="px-3" src="/aryans/LeftColumn/Email.png" alt="Email Icon" />
             <input
               className="w-full border-none outline-none"
               type="email"
@@ -122,7 +122,7 @@ const Login = () => {
 
           {/* Password Input */}
           <div className="relative flex items-center w-2/5 p-1 border-2 border-black rounded-md">
-            <img className="px-3" src="./LeftColumn/Password.png" alt="Password Icon" />
+            <img className="px-3" src="/aryans/LeftColumn/Password.png" alt="Password Icon" />
             <input
               className="w-full border-none outline-none"
               type={passwordVisible ? "text" : "password"}
@@ -157,7 +157,7 @@ const Login = () => {
         </form>
         <img
           className="absolute w-full p-2 bottom-10"
-          src="./LeftColumn/P1_bg.png"
+          src="/aryans/LeftColumn/P1_bg.png"
           alt="Background"
         />
       </div>
@@ -166,7 +166,7 @@ const Login = () => {
       <div
         className="w-1/2 h-full text-3xl text-gray-600 bg-right bg-no-repeat bg-cover"
         style={{
-          backgroundImage: "url('./LeftColumn/P2_bg.png')",
+          backgroundImage: "url('/aryans/LeftColumn/P2_bg.png')",
         }}
       >
         <div className="pt-20 text-center ">

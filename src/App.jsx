@@ -98,7 +98,7 @@ export default function RootApp() {
   return (
     <LoginProvider>
       <SidebarProvider>
-        <Router  basename="/aryans/">
+        <Router  basename="/aryans">
           <AppWrapper />
         </Router>
       </SidebarProvider>
