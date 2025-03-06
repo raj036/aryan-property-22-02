@@ -2,15 +2,17 @@ import { useEffect, useState, useRef } from "react";
 import CommercialPropertyModal from "./CommercialPropertyModal";
 import axios from "../helper/axios";
 
-const DescriptionTypeDropdown = ({ onChange }) => {
+const DescriptionTypeDropdown = ({ onChange , setFurnishedId , desc , setDescProp}) => {
   const [selectedType, setSelectedType] = useState({}); // Store selected object
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [DesId, setDesId] = useState("");
+  const [showDesc, setShowDesc] = useState(true);
+
 
   const dropdownRef = useRef(null);
-
+  
   const fetchPropertyTypes = async () => {
     try {
       const response = await axios.get("/api/descriptions/");
@@ -64,7 +66,7 @@ const DescriptionTypeDropdown = ({ onChange }) => {
       >
         <input
           type="text"
-          value={selectedType.description || ""} // Show description name
+          value={selectedType.description || showDesc && desc } // Show description name
           readOnly
           className="h-10 w-full mt-2 p-3 border border-[#D3DAEE] rounded-lg shadow-sm cursor-pointer"
         />
@@ -82,8 +84,8 @@ const DescriptionTypeDropdown = ({ onChange }) => {
             <div
               key={type.des_id} // Use des_code as key
               className="p-3 cursor-pointer hover:bg-blue-500 hover:text-white"
-              onClick={() => handleTypeSelect(type)}
-              value={selectedType.description || ""}
+              onClick={() => {handleTypeSelect(type); setShowDesc(false)}}
+              value={selectedType.description || "" }
             >
               {type.description}
             </div>
@@ -94,6 +96,7 @@ const DescriptionTypeDropdown = ({ onChange }) => {
         isOpen={isModalOpen}
         DesId={DesId}
         onClose={() => setIsModalOpen(false)}
+        setFurnishedId={setFurnishedId}
       />
     </div>
   );

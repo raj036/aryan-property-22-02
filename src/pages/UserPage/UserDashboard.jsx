@@ -27,7 +27,7 @@ const UserDashboard = () => {
   });
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [isEast, setIsEast] = useState(true);
+  const [isEast, setIsEast] = useState(false);
   const [isWest, setIsWest] = useState(false);
   const MIN_SQFT = 0;
   const MAX_SQFT = 100000;
@@ -186,6 +186,21 @@ const UserDashboard = () => {
         (property.carpet >= filters.areaSize[0] &&
           property.carpet <= filters.areaSize[1]);
 
+          let matchesDirection = true;
+      
+          //(!isEast && !isWest) || (isEast && property.east_west == "east") || (isWest &&  property.east_west === "west");
+   
+          if ((isEast && isWest) || (!isEast && !isWest)) {
+           matchesDirection = true;
+         } 
+         // If only East is checked, show only East properties
+         else if (isEast) {
+           matchesDirection = property.east_west === "east";
+         } 
+         // If only West is checked, show only West properties
+         else if (isWest) {
+           matchesDirection = property.east_west === "west"; }
+
       return (
         matchesSearch &&
         matchesDropdownPropertyType &&
@@ -194,7 +209,8 @@ const UserDashboard = () => {
         matchesPrice &&
         matchesAreaSize &&
         matchesFunUnfurn &&
-        matchesLLOutright
+        matchesLLOutright &&
+        matchesDirection
       );
     });
   };
@@ -639,75 +655,68 @@ const UserDashboard = () => {
                           className="cursor-pointer hover:bg-gray-50"
                           onClick={() => showContactDetails(property)}
                         >
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.building}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.city_name}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.east_west}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.address}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.areas_name}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.area_name}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.description}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.outright}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.property_type}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.poss_status}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.company_builder_name}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.builderaddress}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.contact_person1}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.conatact_person_number_1}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.contact_person2}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.conatact_person_number_2}
                           </td>
                           <td className="px-4 py-2 break-all border text-wrap">
                             {property.email}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             {property.reffered_by}
                           </td>
-                          <td className="px-4 py-2 border text-wrap">
+                          <td className="px-4 py-2 break-all border text-wrap">
                             <div className="flex justify-center gap-4">
                               <FaEdit
                                 className="text-blue-600 cursor-pointer"
                                 onClick={(e) => {
-                                  try {
                                     e.stopPropagation();
                                     setEditProperty(true);
                                     setProperty(property);
-                                  } catch (error) {
-                                    console.error(
-                                      "Error in click handler:",
-                                      error
-                                    );
-                                  }
                                 }}
                               />
                               <MdDelete

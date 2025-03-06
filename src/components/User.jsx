@@ -423,8 +423,9 @@ const User = () => {
               <div>
                 <h1 className="pb-3">Phone Number</h1>
                 <input
-                  className="p-2 bg-gray-100 border rounded-md"
+                  className="p-2 border rounded-md"
                   type="text"
+                  maxLength={10}
                   value={selectedUser.phone_no || ""}
                   onChange={(e) =>
                     setSelectedUser({
@@ -455,7 +456,7 @@ const User = () => {
               <div>
                 <h1 className="pb-3">New Password</h1>
                 <input
-                  className="p-2 bg-gray-100 border rounded-md"
+                  className="p-2 border rounded-md"
                   type="text"
                   value={selectedUser.user_password || ""}
                   onChange={(e) =>

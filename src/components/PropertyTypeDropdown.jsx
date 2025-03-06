@@ -1,78 +1,88 @@
-import React, { useEffect, useState , useRef} from "react";
-import CommercialPropertyModal from "./CommercialPropertyModal";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "../helper/axios";
 
-const PropertyTypeDropdown = ({ onChange }) => {
-  const [selectedType, setSelectedType] = useState("");
+const PropertyTypeDropdown = ({ onChange, value, propertyType }) => {
+  const [selectedType, setSelectedType] = useState(""); // Stores category name for UI
+  const [selectedTypeId, setSelectedTypeId] = useState(""); // Stores type_id internally
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [ProCategories, setProCategories] = useState([]);
-  const [id, setId] = useState("");
-  
+  const [ProCategories, setProCategories] = useState([]); // Stores fetched property types
   const dropdownRef = useRef(null);
+  const [showProperty, setShowProperty] = useState(true);
 
-  const ProTypes = async () => {
-    try {
-      const response = await axios.get("/api/property_types/");
-      setProCategories(response.data);
-      // console.log(response.data);
-    } catch (error) {
-      console.error("Error fetching property types:", error);
-    }
-  };
-
+  // Fetch Property Types from API
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+    const fetchPropertyTypes = async () => {
+      try {
+        const response = await axios.get("/api/property_types/");
+        console.log("📌 Fetched Property Types:", response.data);
+        setProCategories(response.data);
+      } catch (error) {
+        console.error("❌ Error fetching property types:", error);
       }
     };
 
-    if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showDropdown]);
-
-  useEffect(() => {
-    ProTypes();
+    fetchPropertyTypes();
   }, []);
 
   useEffect(() => {
-    // console.log("Updated Property Categories:", ProCategories);
-  }, [ProCategories]);
+    if (!ProCategories.length) return; // Prevent running before data loads
+
+    console.log("🔄 Running useEffect | value:", value, "| ProCategories:", ProCategories);
+
+    // Case-insensitive matching based on category
+    const matchedType = ProCategories.find(
+      (type) => type.type_id === value || type.category.toLowerCase() === (value || '').toLowerCase()
+    );
+
+    console.log("✅ Matched Type:", matchedType);
+
+    if (matchedType) {
+      setSelectedType(matchedType.category); // Display category name
+      setSelectedTypeId(matchedType.type_id); // Ensure type_id is stored
+
+      // Ensure that `onChange` always receives `type_id`
+      if (onChange) {
+        onChange(matchedType.type_id);
+        console.log("📤 Sent type_id to parent (useEffect):", matchedType.type_id);
+      }
+    } else {
+      // Reset if no match found
+      setSelectedType('');
+      setSelectedTypeId('');
+      
+      // Optionally notify parent that no valid type was found
+      if (onChange) {
+        onChange(null);
+      }
+    }
+  }, [value, ProCategories]);
 
   const handleTypeSelect = (type) => {
-    console.log(type.type_id);
-    setId(type.type_id);
-    setSelectedType(type.category);
+    console.log("🖱 Selected Type:", type);
+    setSelectedType(type.category.trim());
+    setSelectedTypeId(type.type_id); // Ensure correct type_id is stored
     setShowDropdown(false);
 
-    // Pass the selected value and type_id to the parent component
     if (onChange) {
-      onChange(type.type_id);
+      onChange(type.type_id); // Pass type_id to parent
+      console.log("📤 Sent type_id to parent:", type.type_id);
     }
   };
+
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <label className="block text-sm font-semibold">Property Type</label>
-      <div
-        onClick={() => setShowDropdown(!showDropdown)}
-        className="relative flex mt-[8px]"
-      >
+      <div onClick={() => setShowDropdown(!showDropdown)} className="relative flex mt-[8px]">
         <input
           type="text"
-          value={selectedType}
+          value={selectedType || showProperty && propertyType}
           readOnly
           className="h-10 w-full p-[12px] border border-[#D3DAEE] rounded-lg shadow-sm cursor-pointer"
         />
         <img
-          className={`object-none absolute bottom-4 right-[8px] ${
-            showDropdown && "rotate-180"
-          } `}
+          className={`object-none absolute bottom-4 right-[8px] transition-transform duration-300 ${
+            showDropdown ? "rotate-180" : "rotate-0"
+          }`}
           src="./LeftColumn/Closed.png"
           alt="dropdown indicator"
         />
@@ -83,18 +93,13 @@ const PropertyTypeDropdown = ({ onChange }) => {
             <div
               key={item.type_id}
               className="p-3 cursor-pointer hover:bg-blue-500 hover:text-white"
-              onClick={() => handleTypeSelect(item)}
+              onClick={() => {handleTypeSelect(item); setShowProperty(false);}}
             >
-              {item.category}
+              {item.category.trim()}
             </div>
           ))}
         </div>
       )}
-      <CommercialPropertyModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        id={id}
-      />
     </div>
   );
 };

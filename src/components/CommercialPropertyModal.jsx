@@ -4,7 +4,7 @@ import { MdCancel } from "react-icons/md";
 import axios from "../helper/axios";
 import Swal from "sweetalert2";
 
-const CommercialPropertyModal = ({ isOpen, onClose, DesId }) => {
+const CommercialPropertyModal = ({ isOpen, onClose, DesId ,setFurnishedId}) => {
   const [DescId, setDescId] = useState(DesId || "");
 
   const [formData, setFormData] = useState({
@@ -109,7 +109,18 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId }) => {
         onClose();
       }
 
-      console.log("Response:", response.data);
+      if (response?.data) {
+        // Use the returned ID directly
+        const newFurnishedId = response.data.id;
+        
+        // Update the state
+        setFurnishedId(newFurnishedId);
+  
+        // Log after setting to verify
+        console.log("New Furnished ID:", newFurnishedId);
+        console.log("Furnished ID", furnishedId);
+      }
+      
     } catch (error) {
       console.error("API Error Details:", error.response?.data); // Debugging
     }
@@ -145,8 +156,8 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId }) => {
 
             <input
               type="number"
-              name="workstationCount"
-              value={formData.workstationCount}
+              name="workstations"
+              value={formData.workstations}
               onChange={handleInputChange}
               placeholder="Number of Workstations"
               className="w-full p-2 border border-gray-300 rounded focus:outline-none"

@@ -19,8 +19,12 @@ const PropertyForm = ({
   const token = localStorage.getItem("token");
   const [FilterAreaData, setFilterAreaData] = useState([]);
   const [filterAreaId, setfilterAreaId] = useState(0);
+  const [furnishedId, setFurnishedId] = useState(null);
+  const [desc, setDesc] = useState("Select");
+  const [propertyType, setPropertyType] = useState("Select");
 
   const initialFormState = {
+    furnished_property_id: furnishedId,
     building_name: "",
     full_address: "",
     sublocation: "",
@@ -66,6 +70,13 @@ const PropertyForm = ({
   useEffect(() => {
     // Load initial data when in edit mode
     if (editProperty && property && Object.keys(property).length > 0) {
+      const matchingArea = FilterAreaData.find(
+        (area) => area.area_name === property.areas_name
+      );
+      const areaId = matchingArea ? matchingArea.filter_area_id : null;
+      setfilterAreaId(areaId || 0);
+      setDesc(property.description);
+      setPropertyType(property.property_type);
       setFormData({
         building_name: property.building || "",
         full_address: property.address || "",
@@ -77,35 +88,27 @@ const PropertyForm = ({
         poss_status: property.poss_status || "",
         east_west: property.east_west || "",
         reopen_date: property.reopen || "",
-        description: "Under Maintence",
-        property_type: "Retail",
+        description: property.description,
+        property_type: property.property_type,
         areas: [
           {
-            filter_area_id: 1,
+            filter_area_id: areaId || "",
+            // location: property.areas_name || "",
             built_up_area: property.builtup || null,
             carpet_up_area: property.carpet || null,
             efficiency: property.efficiency || null,
             car_parking: property.car_parking || "",
             rental_psf: property.rate_lease || "",
             outright_rate_psf: property.rate_buy || "",
-            // unit_floor_wing: [
-            //   {
-            //     wing: "",
-            //     floor: property.floor[0].floor || "",
-            //     unit_number: "",
-            //   },
-            // ],
-
-            // Ensure `property.floors` is an array before mapping
             // eslint-disable-next-line react/prop-types
-            unit_floor_wing: Array.isArray(property.floor)
-              // eslint-disable-next-line react/prop-types
-              ? property?.floor.map((item) => ({
-                wing: item.wing || "",
-                floor: item.floor || "",
-                unit_number: item.unit_number || "",
-              }))
-              : [],
+            unit_floor_wing:
+              Array.isArray(property.floor) && property.floor.length > 0
+                ? property.floor.map((item) => ({
+                    wing: item.wing || "",
+                    floor: item.floor || "",
+                    unit_number: item.unit_number || "",
+                  }))
+                : [{ wing: "", floor: "", unit_number: "" }],
             contacts: [
               {
                 company_builder_name: property.company_builder_name || "",
@@ -127,11 +130,13 @@ const PropertyForm = ({
       // Use empty form for new property
       setFormData(initialFormState);
     }
-  }, [property, editProperty]);
+  }, [property, editProperty, FilterAreaData]);
+
   const FilterArea = async () => {
     try {
       const response = await axios.get("/api/filter_area/");
       setFilterAreaData(response.data);
+      console.log(response, "location");
     } catch (error) {
       console.error("Error fetching filter areas:", error);
       Swal.fire({
@@ -157,6 +162,8 @@ const PropertyForm = ({
   const handlefilterAreaId = (location) => {
     const locationId = parseInt(location);
     setfilterAreaId(locationId);
+    console.log(locationId);
+    // console.log(location.area_name)
 
     setFormData((prev) => ({
       ...prev,
@@ -177,7 +184,6 @@ const PropertyForm = ({
       "built_up_area",
       "carpet_up_area",
       "efficiency",
-
       "conatact_person_number_1",
       "conatact_person_number_2",
     ];
@@ -215,6 +221,9 @@ const PropertyForm = ({
         ],
       }));
     }
+
+    console.log("Property:", property);
+    console.log("Initialized formData:", formData);
   };
 
   const handleEastWestChange = (direction) => {
@@ -269,7 +278,6 @@ const PropertyForm = ({
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    console.log("eddting start");
     if (editProperty) {
       console.log(property.property_code, "propertycode");
       try {
@@ -361,8 +369,17 @@ const PropertyForm = ({
     }
   };
 
+  useEffect(() => {
+    if (furnishedId) {
+      setFormData((prev) => ({
+        ...prev,
+        furnished_property_id: furnishedId, // ✅ Only update this field
+      }));
+    }
+  }, [furnishedId]); // ✅ Runs only when `furnishedId` updates
+
   return (
-    <div className="relative max-h-screen p-8 mt-1 rounded-lg shadow-md ">
+    <div className="relative p-8 mt-1 rounded-lg shadow-md h-fit-content ">
       <button
         onClick={() => {
           setFormData(initialFormState);
@@ -378,11 +395,13 @@ const PropertyForm = ({
         {tabs.map((tab, index) => (
           <button
             key={index}
-            className={`flex-1 py-3 font-semibold rounded-md ${index !== tabs.length - 1 ? "border-r-2" : ""
-              } ${activeTab === index
+            className={`flex-1 py-3 font-semibold rounded-md ${
+              index !== tabs.length - 1 ? "border-r-2" : ""
+            } ${
+              activeTab === index
                 ? "text-white bg-blue-900"
                 : "hover:text-blue-700"
-              }`}
+            }`}
             onClick={() => setActiveTab(index)}
           >
             {tab.replace(/([A-Z])/g, " $1").trim()}
@@ -393,6 +412,14 @@ const PropertyForm = ({
       {activeTab === 0 && (
         <form className="grid h-full grid-cols-3 gap-10 mx-auto mt-6">
           <div className="space-y-2">
+            <label> Furnised if</label>
+            <input
+              type="number"
+              name="furnished_property_id"
+              className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
+              onChange={(e) => handleInputChange(e, "property")}
+              value={formData.furnished_property_id}
+            />
             <label className="block text-sm font-semibold">Building Name</label>
             <input
               type="text"
@@ -452,8 +479,8 @@ const PropertyForm = ({
             <select
               name="location"
               className="h-10 w-full p-1 border border-[#D3DAEE] rounded-lg shadow-sm"
-              onChange={(e) => handlefilterAreaId(e.target.value)}
-              value={filterAreaId}
+              onChange={(e) => handlefilterAreaId(e.target.value.trim())}
+              value={formData.areas[0].filter_area_id || ""}
             >
               <option value="">Select Location</option>
               {FilterAreaData.map((location) => (
@@ -461,7 +488,7 @@ const PropertyForm = ({
                   key={location.filter_area_id}
                   value={location.filter_area_id}
                 >
-                  {location.area_name}
+                  {location.area_name.trim()}
                 </option>
               ))}
             </select>
@@ -473,24 +500,34 @@ const PropertyForm = ({
                   "property"
                 )
               }
+              setFurnishedId={setFurnishedId}
+              desc={desc}
+              setDescProp={setDesc}
             />
 
             <PropertyTypeDropdown
-              onChange={(value) =>
-                handleInputChange(
-                  { target: { name: "property_type", value } },
-                  "property"
-                )
-              }
+              onChange={(typeId) => {
+                console.log(
+                  "📤 Selected type_id received from dropdown:",
+                  typeId
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  property_type: typeId, // Ensure `type_id` is stored
+                }));
+              }}
+              value={formData.property_type} // Ensure dropdown receives `type_id`
+              propertyType={propertyType} // Only for UI display
             />
 
             <ReopenDateDropdown
               onChange={(value) =>
-                handleInputChange(
-                  { target: { name: "reopen_date", value } },
-                  "property"
-                )
+                setFormData((prev) => ({
+                  ...prev,
+                  reopen_date: value, // Store updated value in formData
+                }))
               }
+              value={formData.reopen_date} // Pre-fill in edit mode
             />
           </div>
 
@@ -528,21 +565,23 @@ const PropertyForm = ({
                 onChange={(e) => handleInputChange(e, "propertyDetails")}
               />
 
-              <label className="block text-sm font-semibold">Efficiency (%)</label>
+              <label className="block text-sm font-semibold">
+                Efficiency (%)
+              </label>
               <input
                 type="number"
                 name="efficiency"
                 className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
                 value={formData.areas[0].efficiency}
                 onChange={(e) => handleInputChange(e, "propertyDetails")}
-              // onChange={(e) => {
-              //   let value = e;
+                // onChange={(e) => {
+                //   let value = e;
 
-              //   // Allow only numbers and a single '%' symbol
-              //   if (/^\d*%?$/.test(value)) {
-              //     handleInputChange({ target: { name: "efficiency", value } }, "propertyDetails");
-              //   }
-              // }}
+                //   // Allow only numbers and a single '%' symbol
+                //   if (/^\d*%?$/.test(value)) {
+                //     handleInputChange({ target: { name: "efficiency", value } }, "propertyDetails");
+                //   }
+                // }}
               />
 
               <label className="block text-sm font-semibold">Rental psf</label>
@@ -556,7 +595,9 @@ const PropertyForm = ({
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-semibold">Carpet Area (sq.ft.)</label>
+              <label className="block text-sm font-semibold">
+                Carpet Area (sq.ft.)
+              </label>
               <input
                 type="number"
                 name="carpet_up_area"
@@ -660,7 +701,7 @@ const PropertyForm = ({
                     }}
                   />
                 </div>
-                {index > 0 && (
+                {index > 0 && !editProperty && (
                   <button
                     onClick={() => {
                       const newUnits = formData.areas[0].unit_floor_wing.filter(
@@ -683,30 +724,31 @@ const PropertyForm = ({
                 )}
               </div>
             ))}
-
-            <div className="flex w-[50%] justify-center mt-4">
-              <button
-                onClick={() => {
-                  const newUnits = [
-                    ...formData.areas[0].unit_floor_wing,
-                    { wing: "", floor: "", unit_number: "" },
-                  ];
-                  setFormData((prev) => ({
-                    ...prev,
-                    areas: [
-                      {
-                        ...prev.areas[0],
-                        unit_floor_wing: newUnits,
-                      },
-                    ],
-                  }));
-                }}
-                className="flex items-center space-x-2 text-blue-500 hover:text-blue-700"
-              >
-                <FaPlus />
-                <span>Add More</span>
-              </button>
-            </div>
+            {!editProperty && (
+              <div className="flex w-[50%] justify-center mt-4">
+                <button
+                  onClick={() => {
+                    const newUnits = [
+                      ...formData.areas[0].unit_floor_wing,
+                      { wing: "", floor: "", unit_number: "" },
+                    ];
+                    setFormData((prev) => ({
+                      ...prev,
+                      areas: [
+                        {
+                          ...prev.areas[0],
+                          unit_floor_wing: newUnits,
+                        },
+                      ],
+                    }));
+                  }}
+                  className="flex items-center space-x-2 text-blue-500 hover:text-blue-700"
+                >
+                  <FaPlus />
+                  <span>Add More</span>
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}

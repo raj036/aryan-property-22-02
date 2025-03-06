@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addMonths, subMonths, setYear, setMonth } from 'date-fns';
 
-const PropertyStatusDropdown = ({ onChange }) => {
+const PropertyStatusDropdown = ({ onChange , value}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
@@ -17,6 +17,23 @@ const PropertyStatusDropdown = ({ onChange }) => {
   const dropdownRef = useRef(null);
   const yearDropdownRef = useRef(null);
   const monthDropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (value) {
+      const parts = value.split(" "); // Example: "Reopen Date 10/10/2024"
+      const status = parts.slice(0, 2).join(" "); // "Reopen Date"
+      const datePart = parts.length > 2 ? parts.slice(2).join(" ") : null;
+
+      setSelection({
+        status,
+        date: datePart
+          ? new Date(datePart.split("/").reverse().join("-"))
+          : null,
+        displayValue: value,
+      });
+    }
+  }, [value]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
