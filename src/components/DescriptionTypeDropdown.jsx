@@ -6,7 +6,6 @@ const DescriptionTypeDropdown = ({ onChange, setFurnishedId, desc, value }) => {
   const [selectedType, setSelectedType] = useState({}); // Store selected object
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [propertyTypes, setPropertyTypes] = useState([]);
   const [DesId, setDesId] = useState("");
   const [showDesc, setShowDesc] = useState(true);
   const [selectedDescription, setSelectedDescription] = useState(""); // Displayed description text
@@ -91,7 +90,7 @@ const DescriptionTypeDropdown = ({ onChange, setFurnishedId, desc, value }) => {
       onChange(type.des_id);
     }
 
-    if (type.descriptio.trim === "Furnished") {
+    if (type.description === "Furnished") {
       setIsModalOpen(true);
     }
   };
@@ -129,7 +128,7 @@ const DescriptionTypeDropdown = ({ onChange, setFurnishedId, desc, value }) => {
               }}
               //value={selectedType.description || ""}
             >
-              {type.description.trim}
+              {type.description}
             </div>
           ))}
         </div>
