@@ -412,11 +412,11 @@ const PropertyForm = ({
       {activeTab === 0 && (
         <form className="grid h-full grid-cols-3 gap-10 mx-auto mt-6">
           <div className="space-y-2">
-            <label> Furnised if</label>
+            <label className="hidden"> Furnised if</label>
             <input
               type="number"
               name="furnished_property_id"
-              className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm"
+              className="h-10 w-full p-3 border border-[#D3DAEE] rounded-lg shadow-sm hidden"
               onChange={(e) => handleInputChange(e, "property")}
               value={formData.furnished_property_id}
             />
@@ -466,7 +466,7 @@ const PropertyForm = ({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold">Full Address</label>
+            <label className="block mt-2 text-sm font-semibold">Full Address</label>
             <input
               type="text"
               name="full_address"
