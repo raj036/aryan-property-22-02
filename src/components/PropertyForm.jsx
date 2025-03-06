@@ -82,13 +82,12 @@ const PropertyForm = ({
         full_address: property.address || "",
         sublocation: property.area_name || "",
         city: property.city_name || "",
-        des_code: "",
         LL_outright: property.outright || "",
         //property_type: property.property_type || "",
         poss_status: property.poss_status || "",
         east_west: property.east_west || "",
         reopen_date: property.reopen || "",
-        description: property.description,
+        des_code: property.description,
         property_type: property.property_type,
         areas: [
           {
@@ -466,7 +465,9 @@ const PropertyForm = ({
           </div>
 
           <div className="space-y-2">
-            <label className="block mt-2 text-sm font-semibold">Full Address</label>
+            <label className="block mt-2 text-sm font-semibold">
+              Full Address
+            </label>
             <input
               type="text"
               name="full_address"
@@ -494,15 +495,20 @@ const PropertyForm = ({
             </select>
 
             <DescriptionTypeDropdown
-              onChange={(value) =>
-                handleInputChange(
-                  { target: { name: "des_code", value } },
-                  "property"
-                )
-              }
+              onChange={(desId) => {
+                console.log(
+                  "📤 Selected type_id received from dropdown:",
+                  desId
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  des_code: desId, // Ensure type_id is stored
+                }));
+              }}
+              value={formData.des_code}
               setFurnishedId={setFurnishedId}
               desc={desc}
-              setDescProp={setDesc}
+              //setDescProp={setDesc}
             />
 
             <PropertyTypeDropdown

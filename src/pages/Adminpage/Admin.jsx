@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [userCount, setUserCount] = useState(0);
   const [clientCount, setClientCount] = useState(0);
   const [propertyCount, setPropertyCount] = useState(0);
+  const [from, setFrom] = useState("");
 
   const fetchUsers = async () => {
     try {
