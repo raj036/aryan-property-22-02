@@ -146,16 +146,18 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
         {/* Property Type Filter */}
         <div className="p-3">
           <h2 className="mb-3 font-medium text-gray-500">Property Type</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid ${
+    filteredPropertyTypes.length > 6 ? "grid-cols-2" : "grid-cols-1"
+  } gap-3`}>
             {filteredPropertyTypes.map((type, index) => (
-              <label key={index} className="flex items-center gap-2">
+              <label key={index} className="flex items-center gap-2 break-words">
                 <input
                   type="checkbox"
                   value={type}
                   onChange={() => handlePropertyTypeChange(type)}
                   checked={Array.isArray(currentFilters.propertyType) && currentFilters.propertyType.includes(type)}
                 />
-                <span className="mx-2">{type}</span>
+                <span className="mx-2 break-words whitespace-normal">{type}</span>
               </label>
             ))}
           </div>

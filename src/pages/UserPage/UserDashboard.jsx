@@ -100,6 +100,7 @@ const UserDashboard = () => {
 
       // Transform the API response to match the expected structure
       const transformedProperties = response.data.map((property) => ({
+        furnished_details: property.furnished_details,
         building: property.building_name || "-",
         property_code: property.property_code || "-",
         address: property.full_address || "-",
@@ -169,9 +170,9 @@ const UserDashboard = () => {
       const matchesFunUnfurn = !funUnfurn || property.description === funUnfurn;
 
       const matchesSidebarPropertyType =
-      !filters.propertyType || 
-      filters.propertyType.length === 0 ||
-      filters.propertyType.includes(property.property_type);
+        !filters.propertyType ||
+        filters.propertyType.length === 0 ||
+        filters.propertyType.includes(property.property_type);
 
       const matchesCity = !filters.city || property.city_name === filters.city;
 
@@ -186,20 +187,21 @@ const UserDashboard = () => {
         (property.carpet >= filters.areaSize[0] &&
           property.carpet <= filters.areaSize[1]);
 
-          let matchesDirection = true;
-      
-          //(!isEast && !isWest) || (isEast && property.east_west == "east") || (isWest &&  property.east_west === "west");
-   
-          if ((isEast && isWest) || (!isEast && !isWest)) {
-           matchesDirection = true;
-         } 
-         // If only East is checked, show only East properties
-         else if (isEast) {
-           matchesDirection = property.east_west === "east";
-         } 
-         // If only West is checked, show only West properties
-         else if (isWest) {
-           matchesDirection = property.east_west === "west"; }
+      let matchesDirection = true;
+
+      //(!isEast && !isWest) || (isEast && property.east_west == "east") || (isWest &&  property.east_west === "west");
+
+      if ((isEast && isWest) || (!isEast && !isWest)) {
+        matchesDirection = true;
+      }
+      // If only East is checked, show only East properties
+      else if (isEast) {
+        matchesDirection = property.east_west === "east";
+      }
+      // If only West is checked, show only West properties
+      else if (isWest) {
+        matchesDirection = property.east_west === "west";
+      }
 
       return (
         matchesSearch &&
@@ -271,83 +273,165 @@ const UserDashboard = () => {
   const filteredProperties = getFilteredProperties();
 
   const showContactDetails = (property) => {
-    const efficiency =
-      property.efficiency || property.areas?.[0]?.efficiency || "-";
-    const rate_buy =
-      property.rate_buy || property.areas?.[0]?.outright_rate_psf || "-";
-    const rate_lease =
-      property.rate_lease || property.areas?.[0]?.rental_psf || "-";
-    const floor =
-      property.floor || property.areas?.[0]?.floor_wing_unit_number || "-";
-    const car_parking =
-      property.car_parking || property.areas?.[0]?.car_parking || "-";
-    const builtup =
-      property.builtup || property.areas?.[0]?.built_up_area || "-";
-    const carpet =
-      property.carpet || property.areas?.[0]?.carpet_up_area || "-";
-    const reopen = property.reopen || property.reopen_data || "-";
-
     Swal.fire({
       title: `<h2 style="color: #2c3e50; font-weight: 700; margin-bottom: 10px;">Property Details</h2>`,
       html: `
-        <div style="text-align: left; font-size: 16px; color: #2c3e50; line-height: 1.6;">
-          <p><strong>Efficiency:</strong> ${efficiency}%</p>
-          <p><strong>Buy Rate:</strong> ${rate_buy}</p>
-          <p><strong>Lease Rate:</strong> ${rate_lease}</p>
-  
-          <div style="margin-top: 10px; padding: 4px;  border-radius: 6px;">
+        <div style="text-align: left; font-size: 16px; color: #2c3e50; line-height: 1.6; width: auto; max-width: 450px; overflow: hidden;">
+          <p><strong>Efficiency:</strong> ${property.efficiency}%</p>
+          <p><strong>Buy Rate:</strong> ${property.rate_buy}</p>
+          <p><strong>Lease Rate:</strong> ${property.rate_lease}</p>
+    
+          <div style="margin-top: 10px; padding: 4px; border-radius: 6px; overflow: hidden;">
             <strong style="font-size: 17px;">Floor Details:</strong>
-            <table style="width: 50; border-collapse: collapse; margin-top: 5px; font-size: 10px; table-layout: unset;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px;">
               <tr style="background: #dcdcdc; font-weight: bold;">
-                <th style="padding: 3px; border: 1px solid #ccc;">Floor</th>
-                <th style="padding: 3px; border: 1px solid #ccc;">Unit No.</th>
-                <th style="padding: 3px; border: 1px solid #ccc;">Wing</th>
+                <th style="padding: 3px; border: 1px solid #ccc; width: 33%;">Floor</th>
+                <th style="padding: 3px; border: 1px solid #ccc; width: 33%;">Unit No.</th>
+                <th style="padding: 3px; border: 1px solid #ccc; width: 33%;">Wing</th>
               </tr>
-              ${
-                Array.isArray(floor)
-                  ? floor
-                      .map(
-                        (ele) => `
+              ${property.floor
+                .map(
+                  (ele) => `
                   <tr>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
-                      ele.floor || "-"
-                    }</td>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
-                      ele.unit_number || "-"
-                    }</td>
-                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${
-                      ele.wing || "-"
-                    }</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.floor}</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.unit_number}</td>
+                    <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${ele.wing}</td>
                   </tr>
                 `
-                      )
-                      .join("")
-                  : `
-                <tr>
-                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">${floor}</td>
-                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">-</td>
-                  <td style="padding: 3px; border: 1px solid #ccc; text-align: center;">-</td>
-                </tr>
-              `
-              }
+                )
+                .join("")}
             </table>
           </div>
-  
-          <p><strong>Car Parking:</strong> ${car_parking}</p>
-          <p><strong>Builtup Area:</strong> ${builtup} sqft</p>
-          <p><strong>Carpet Area:</strong> ${carpet} sqft</p>
-          <p><strong>Reopen Date:</strong> ${reopen}</p>
-          
-          <hr style="border-top: 1px solid #dcdcdc; margin: 10px 0;"/>
+    
+          <p><strong>Car Parking:</strong> ${property.car_parking}</p>
+          <p><strong>Builtup Area:</strong> ${property.builtup} sqft</p>
+          <p><strong>Carpet Area:</strong> ${property.carpet} sqft</p>
+          <p><strong>Reopen Date:</strong> ${property.reopen}</p>
+    
+          ${
+            property.furnished_details
+              ? `
+          <div class="furnished-details-section">
+            
+            <div style="width: 100%; text-align: center;  display: flex; justify-content: center; align-items: center; padding: 10px;">
+               <button id="seeMoreBtn" style="margin-top: 10px; padding: 6px 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              See Furnished Details
+            </button>
+            </div>
+    
+            <div id="furnishedDetails" style="display: none; margin-top: 10px;">
+              <hr style="border-top: 1px solid #dcdcdc; margin: 10px 0;"/>
+              <div class="furnished-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div>
+                  <p><strong>Workstations:</strong> ${
+                    property.furnished_details.workstations
+                  }</p>
+                  <p><strong>Cubicle Type:</strong> ${
+                    property.furnished_details.workstation_type_cubicle
+                      ? "Yes"
+                      : "No"
+                  }</p>
+                  <p><strong>Linear Type:</strong> ${
+                    property.furnished_details.workstation_type_linear
+                      ? "Yes"
+                      : "No"
+                  }</p>
+                  <p><strong>Both Types:</strong> ${
+                    property.furnished_details.workstation_type_both
+                      ? "Yes"
+                      : "No"
+                  }</p>
+                  <p><strong>Cabins:</strong> ${
+                    property.furnished_details.cabins
+                  }</p>
+                </div>
+                <div>
+                  <p><strong>Meeting Rooms:</strong> ${
+                    property.furnished_details.meeting_rooms
+                  }</p>
+                  <p><strong>Conference Rooms:</strong> ${
+                    property.furnished_details.conference_rooms
+                  }</p>
+                  <p><strong>Cafeteria Seats:</strong> ${
+                    property.furnished_details.cafeteria_seats
+                  }</p>
+                  <p><strong>Washrooms:</strong> ${
+                    property.furnished_details.washrooms
+                  }</p>
+                </div>
+              </div>
+              
+              <div className="additional-amenities" style="margin-top: 10px;">
+  ${
+    property.furnished_details.pantry_area ||
+    property.furnished_details.backup_ups_room ||
+    property.furnished_details.server_electrical_room ||
+    property.furnished_details.reception_waiting_area
+      ? `
+    <p><strong>Additional Amenities:</strong></p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      ${
+        property.furnished_details.pantry_area
+          ? '<span style="background-color: #e9ecef; padding: 5px; border-radius: 4px;">Pantry Area</span>'
+          : ""
+      }
+      ${
+        property.furnished_details.backup_ups_room
+          ? '<span style="background-color: #e9ecef; padding: 5px; border-radius: 4px;">Backup UPS Room</span>'
+          : ""
+      }
+      ${
+        property.furnished_details.server_electrical_room
+          ? '<span style="background-color: #e9ecef; padding: 5px; border-radius: 4px;">Server Electrical Room</span>'
+          : ""
+      }
+      ${
+        property.furnished_details.reception_waiting_area
+          ? '<span style="background-color: #e9ecef; padding: 5px; border-radius: 4px;">Reception & Waiting Area</span>'
+          : ""
+      }
+    </div>
+    `
+      : ""
+  }
+</div>
+    
+              <div style="width: 100%; text-align: center;  display: flex; justify-content: center; align-items: center; padding: 10px;">
+    <button id="seeLessBtn" style="padding: 6px 10px; color: white; border: none; border-radius: 4px; cursor: pointer; background-color: #dc3545;">
+        Hide Furnished Details
+    </button>
+</div>
+            </div>
+          </div>
+          `
+              : ""
+          }
         </div>`,
       confirmButtonText: "Close",
-      width: "480px",
+      width: "500px",
       background: "#ffffff",
       showClass: {
         popup: "animate__animated animate__fadeInDown",
       },
       hideClass: {
         popup: "animate__animated animate__fadeOutUp",
+      },
+      didOpen: () => {
+        const seeMoreBtn = document.getElementById("seeMoreBtn");
+        const seeLessBtn = document.getElementById("seeLessBtn");
+        const furnishedDetails = document.getElementById("furnishedDetails");
+
+        if (seeMoreBtn && seeLessBtn && furnishedDetails) {
+          seeMoreBtn.addEventListener("click", () => {
+            furnishedDetails.style.display = "block";
+            seeMoreBtn.style.display = "none";
+          });
+
+          seeLessBtn.addEventListener("click", () => {
+            furnishedDetails.style.display = "none";
+            seeMoreBtn.style.display = "inline-block";
+          });
+        }
       },
     });
   };
@@ -380,7 +464,6 @@ const UserDashboard = () => {
       }
     });
   };
-
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -607,8 +690,8 @@ const UserDashboard = () => {
               setShowPropertyForm={setShowPropertyForm}
               onSubmit={fetchProperties}
               setEditProperty={setEditProperty}
-          editProperty={editProperty}
-          property={property}
+              editProperty={editProperty}
+              property={property}
             />
           ) : (
             <div className="w-full overflow-x-auto">
@@ -714,9 +797,9 @@ const UserDashboard = () => {
                               <FaEdit
                                 className="text-blue-600 cursor-pointer"
                                 onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditProperty(true);
-                                    setProperty(property);
+                                  e.stopPropagation();
+                                  setEditProperty(true);
+                                  setProperty(property);
                                 }}
                               />
                               <MdDelete
