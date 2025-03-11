@@ -14,7 +14,7 @@ const PropertyTypeDropdown = ({ onChange, value, propertyType }) => {
     const fetchPropertyTypes = async () => {
       try {
         const response = await axios.get("/api/property_types/");
-        console.log("📌 Fetched Property Types:", response.data);
+        // console.log("📌 Fetched Property Types:", response.data);
         setProCategories(response.data);
       } catch (error) {
         console.error("❌ Error fetching property types:", error);
@@ -27,14 +27,14 @@ const PropertyTypeDropdown = ({ onChange, value, propertyType }) => {
   useEffect(() => {
     if (!ProCategories.length) return; // Prevent running before data loads
 
-    console.log("🔄 Running useEffect | value:", value, "| ProCategories:", ProCategories);
+    // console.log("🔄 Running useEffect | value:", value, "| ProCategories:", ProCategories);
 
     // Case-insensitive matching based on category
     const matchedType = ProCategories.find(
       (type) => type.type_id === value || type.category.toLowerCase() === (value || '').toLowerCase()
     );
 
-    console.log("✅ Matched Type:", matchedType);
+    // console.log("✅ Matched Type:", matchedType);
 
     if (matchedType) {
       setSelectedType(matchedType.category); // Display category name
@@ -43,7 +43,7 @@ const PropertyTypeDropdown = ({ onChange, value, propertyType }) => {
       // Ensure that `onChange` always receives `type_id`
       if (onChange) {
         onChange(matchedType.type_id);
-        console.log("📤 Sent type_id to parent (useEffect):", matchedType.type_id);
+        // console.log("📤 Sent type_id to parent (useEffect):", matchedType.type_id);
       }
     } else {
       // Reset if no match found
@@ -58,14 +58,14 @@ const PropertyTypeDropdown = ({ onChange, value, propertyType }) => {
   }, [value, ProCategories]);
 
   const handleTypeSelect = (type) => {
-    console.log("🖱 Selected Type:", type);
+    // console.log("🖱 Selected Type:", type);
     setSelectedType(type.category.trim());
     setSelectedTypeId(type.type_id); // Ensure correct type_id is stored
     setShowDropdown(false);
 
     if (onChange) {
       onChange(type.type_id); // Pass type_id to parent
-      console.log("📤 Sent type_id to parent:", type.type_id);
+      // console.log("📤 Sent type_id to parent:", type.type_id);
     }
   };
 

@@ -22,7 +22,7 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
     // Sync priceRange with currentFilters from parent
     setPriceRange(currentFilters.priceRange);
     setAnyPrice(currentFilters.anyPrice);
-    console.log(currentFilters, "data filtered");
+    // console.log(currentFilters, "data filtered");
     setSquareSize(currentFilters.areaSize || [MIN_SQFT, MAX_SQFT]);
   }, [currentFilters]);
 

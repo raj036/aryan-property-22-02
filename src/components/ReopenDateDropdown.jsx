@@ -71,7 +71,7 @@ const PropertyStatusDropdown = ({ onChange , value}) => {
       finalValue = status;
     }
     
-    console.log("FINAL USER SELECTION:", finalValue);
+    // console.log("FINAL USER SELECTION:", finalValue);
     if (onChange) {
       onChange(finalValue);
     }

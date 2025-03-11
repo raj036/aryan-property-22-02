@@ -46,7 +46,7 @@ const Property = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
+      // console.log(response.data);
 
       if (!response.data) throw new Error("No data received");
 
@@ -90,7 +90,7 @@ const Property = () => {
         reffered_by: property.contacts[0]?.reffered_by || "-",
         contact_person_address: property.contacts[0]?.address || "-",
       }));
-      console.log(transformedProperties);
+      // console.log(transformedProperties);
       setProperties(transformedProperties);
       setLoading(false);
     } catch (err) {
@@ -444,7 +444,7 @@ const Property = () => {
                                 e.stopPropagation();
                                 setEditProperty(true);
                                 setProperty(property);
-                                console.log(property, "edit prop")
+                                // console.log(property, "edit prop")
                             }}
                           />
                           <MdDelete

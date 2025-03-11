@@ -138,7 +138,7 @@ const UserDashboard = () => {
         reffered_by: property.contacts[0]?.reffered_by || "-",
         contact_person_address: property.contacts[0]?.address || "-",
       }));
-      console.log(transformedProperties);
+      // console.log(transformedProperties);
       setProperties(transformedProperties);
       setFilteredPropertiesSidebar(transformedProperties);
       setLoading(false);

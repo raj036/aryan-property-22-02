@@ -135,7 +135,7 @@ const PropertyForm = ({
     try {
       const response = await axios.get("/api/filter_area/");
       setFilterAreaData(response.data);
-      console.log(response, "location");
+      // console.log(response, "location");
     } catch (error) {
       console.error("Error fetching filter areas:", error);
       Swal.fire({
@@ -161,7 +161,7 @@ const PropertyForm = ({
   const handlefilterAreaId = (location) => {
     const locationId = parseInt(location);
     setfilterAreaId(locationId);
-    console.log(locationId);
+    // console.log(locationId);
     // console.log(location.area_name)
 
     setFormData((prev) => ({
@@ -221,8 +221,8 @@ const PropertyForm = ({
       }));
     }
 
-    console.log("Property:", property);
-    console.log("Initialized formData:", formData);
+    // console.log("Property:", property);
+    // console.log("Initialized formData:", formData);
   };
 
   const handleEastWestChange = (direction) => {
@@ -278,7 +278,7 @@ const PropertyForm = ({
   const handleSubmit = async () => {
     if (!validateForm()) return;
     if (editProperty) {
-      console.log(property.property_code, "propertycode");
+      // console.log(property.property_code, "propertycode");
       try {
         const response = await axios.put(
           `/api/update_property/${property.property_code}`,
@@ -294,7 +294,7 @@ const PropertyForm = ({
         // console.log(response);
         // console.log(formData);
         if (response?.data) {
-          console.log("done editting");
+          // console.log("done editting");
           await Swal.fire({
             icon: "success",
             title: "Property data edited successfully",
@@ -312,7 +312,7 @@ const PropertyForm = ({
         }
       } catch (error) {
         console.log("error editting");
-        console.error("Error edittingform:", error);
+        // console.error("Error edittingform:", error);
         Swal.fire({
           icon: "error",
           title: "Property not editted",
@@ -322,7 +322,7 @@ const PropertyForm = ({
         });
       }
     } else {
-      console.log("adding start");
+      // console.log("adding start");
       try {
         const response = await axios.post(
           "/api/add_property_with_hierarchy/",
@@ -364,7 +364,7 @@ const PropertyForm = ({
             "An error occurred. Please try again.",
         });
       }
-      console.log("done");
+      // console.log("done");
     }
   };
 
@@ -496,10 +496,10 @@ const PropertyForm = ({
 
             <DescriptionTypeDropdown
               onChange={(desId) => {
-                console.log(
-                  "📤 Selected type_id received from dropdown:",
-                  desId
-                );
+                // console.log(
+                //   "📤 Selected type_id received from dropdown:",
+                //   desId
+                // );
                 setFormData((prev) => ({
                   ...prev,
                   des_code: desId, // Ensure type_id is stored
@@ -513,10 +513,10 @@ const PropertyForm = ({
 
             <PropertyTypeDropdown
               onChange={(typeId) => {
-                console.log(
-                  "📤 Selected type_id received from dropdown:",
-                  typeId
-                );
+                // console.log(
+                //   "📤 Selected type_id received from dropdown:",
+                //   typeId
+                // );
                 setFormData((prev) => ({
                   ...prev,
                   property_type: typeId, // Ensure `type_id` is stored

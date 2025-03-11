@@ -25,7 +25,7 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId ,setFurnishedId}) => {
   });
 
   useEffect(() => {
-    console.log("DesId:", DesId); // Debugging
+    // console.log("DesId:", DesId); // Debugging
     setDescId(DesId);
     setFormData((prevState) => ({
       ...prevState,
@@ -84,7 +84,7 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId ,setFurnishedId}) => {
     };
 
     try {
-      console.log("Sending request with data:", formattedData);
+      // console.log("Sending request with data:", formattedData);
 
       const response = await axios.post(
         "/api/furnished_properties/",
@@ -117,8 +117,8 @@ const CommercialPropertyModal = ({ isOpen, onClose, DesId ,setFurnishedId}) => {
         setFurnishedId(newFurnishedId);
   
         // Log after setting to verify
-        console.log("New Furnished ID:", newFurnishedId);
-        console.log("Furnished ID", furnishedId);
+        // console.log("New Furnished ID:", newFurnishedId);
+        // console.log("Furnished ID", furnishedId);
       }
       
     } catch (error) {
