@@ -134,7 +134,11 @@ const PropertyForm = ({
   const FilterArea = async () => {
     try {
       const response = await axios.get("/api/filter_area/");
-      setFilterAreaData(response.data);
+    // Sort the data in ascending order by area_name before setting it to state
+    const sortedData = response.data.sort((a, b) => 
+      a.area_name.trim().localeCompare(b.area_name.trim())
+    );
+    setFilterAreaData(sortedData);
       // console.log(response, "location");
     } catch (error) {
       console.error("Error fetching filter areas:", error);

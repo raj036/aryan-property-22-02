@@ -61,9 +61,12 @@ const UserDashboard = () => {
 
   const FetchfilterArea = async () => {
     try {
-      const response = await axios("/api/filter_area/");
+      const response = await axios.get("/api/filter_area/");
       // console.log(response.data, "filterdata");
-      setFilterArea(response.data);
+      const sortedData = response.data.sort((a, b) =>
+        a.area_name.trim().localeCompare(b.area_name.trim())
+      );
+      setFilterArea(sortedData);
     } catch (e) {
       console.log("error", e);
     }
@@ -603,7 +606,7 @@ const UserDashboard = () => {
                           value={selectedPropertyType}
                           onChange={handlePropertyTypeChange}
                         >
-                          <option value="">All Property Types</option>
+                          <option value="">All Properties</option>
                           {[
                             ...new Set(properties.map((p) => p.property_type)),
                           ].map((type) => (
