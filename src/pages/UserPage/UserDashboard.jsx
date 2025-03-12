@@ -490,7 +490,7 @@ const UserDashboard = () => {
                 value={selectedPropertyType}
                 onChange={handlePropertyTypeChange}
               >
-                <option value="">All Property Types</option>
+                <option value="">All Properties</option>
                 {[...new Set(properties.map((p) => p.property_type))].map(
                   (type) => (
                     <option key={type} value={type}>

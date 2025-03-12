@@ -62,36 +62,48 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
   // Handle property type selection
   const handlePropertyTypeChange = (propertyType) => {
     // Get current selected property types (or initialize empty array)
-    const currentTypes = Array.isArray(currentFilters.propertyType) 
-      ? [...currentFilters.propertyType] 
+    const currentTypes = Array.isArray(currentFilters.propertyType)
+      ? [...currentFilters.propertyType]
       : [];
-    
+
     let updatedTypes;
     if (currentTypes.includes(propertyType)) {
       // If already selected, remove it
-      updatedTypes = currentTypes.filter(type => type !== propertyType);
+      updatedTypes = currentTypes.filter((type) => type !== propertyType);
     } else {
       // If not selected, add it
       updatedTypes = [...currentTypes, propertyType];
     }
-    
+
     onFilterChange({ propertyType: updatedTypes });
   };
 
+  const handleSelectAll = () => {
+    if (
+      Array.isArray(currentFilters.propertyType) &&
+      currentFilters.propertyType.length === filteredPropertyTypes.length
+    ) {
+      // If all are selected, unselect everything
+      onFilterChange({ propertyType: [] });
+    } else {
+      // If not all are selected, select all
+      onFilterChange({ propertyType: [...filteredPropertyTypes] });
+    }
+  };
 
   // Get unique cities from properties
   const availableCities = [...new Set(properties.map((p) => p.city_name))];
 
   // Get property types based on selected city
   const filteredPropertyTypes = currentFilters.city
-  ? [
-      ...new Set(
-        properties
-          .filter((p) => p.city_name === currentFilters.city)
-          .map((p) => p.property_type)
-      ),
-    ]
-  : [...new Set(properties.map((p) => p.property_type))];
+    ? [
+        ...new Set(
+          properties
+            .filter((p) => p.city_name === currentFilters.city)
+            .map((p) => p.property_type)
+        ),
+      ]
+    : [...new Set(properties.map((p) => p.property_type))];
 
   // Update current date every second
   useEffect(() => {
@@ -146,18 +158,42 @@ const UserSidebar = ({ properties = [], currentFilters, onFilterChange }) => {
         {/* Property Type Filter */}
         <div className="p-3">
           <h2 className="mb-3 font-medium text-gray-500">Property Type</h2>
-          <div className={`grid ${
-    filteredPropertyTypes.length > 6 ? "grid-cols-2" : "grid-cols-1"
-  } gap-3`}>
+          <div className={` gap-3`}>
+            {/* "All" Checkbox */}
+            <label className="flex items-center gap-2 break-words">
+              <input
+                type="checkbox"
+                value="all"
+                onChange={handleSelectAll}
+                checked={
+                  Array.isArray(currentFilters.propertyType) &&
+                  currentFilters.propertyType.length ===
+                    filteredPropertyTypes.length
+                }
+              />
+              <span className="mx-2 break-words whitespace-normal">
+                All Properties
+              </span>
+            </label>
+
+            {/* Individual Property Type Checkboxes */}
             {filteredPropertyTypes.map((type, index) => (
-              <label key={index} className="flex items-center gap-2 break-words">
+              <label
+                key={index}
+                className="flex items-center gap-2 break-words"
+              >
                 <input
                   type="checkbox"
                   value={type}
                   onChange={() => handlePropertyTypeChange(type)}
-                  checked={Array.isArray(currentFilters.propertyType) && currentFilters.propertyType.includes(type)}
+                  checked={
+                    Array.isArray(currentFilters.propertyType) &&
+                    currentFilters.propertyType.includes(type)
+                  }
                 />
-                <span className="mx-2 break-words whitespace-normal">{type}</span>
+                <span className="mx-2 break-words whitespace-normal">
+                  {type}
+                </span>
               </label>
             ))}
           </div>

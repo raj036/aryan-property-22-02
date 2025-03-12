@@ -257,7 +257,7 @@ const PropertyForm = ({
     const requiredNumberFields = {
       built_up_area: formData.areas[0].built_up_area,
       carpet_up_area: formData.areas[0].carpet_up_area,
-      efficiency: formData.areas[0].efficiency,
+      // efficiency: formData.areas[0].efficiency,
       filter_area_id: formData.areas[0].filter_area_id,
     };
 
